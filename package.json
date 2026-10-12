@@ -1,0 +1,42 @@
+{
+  "name": "alexisgoatweb-backend-s2-26-2",
+  "version": "1.0.0",
+  "description": "Repositorio de backend para el proyecto.",
+  "main": "src/index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "db:create": "sequelize-cli db:create",
+    "db:migrate": "sequelize-cli db:migrate",
+    "db:seed": "sequelize-cli db:seed:all",
+    "db:reset": "sequelize-cli db:drop && sequelize-cli db:create && sequelize-cli db:migrate && sequelize-cli db:seed:all"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IIC2513/AlexisGoatWEB-Backend-S2-26-2.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/IIC2513/AlexisGoatWEB-Backend-S2-26-2/issues"
+  },
+  "homepage": "https://github.com/IIC2513/AlexisGoatWEB-Backend-S2-26-2#readme",
+  "dependencies": {
+    "@koa/cors": "^5.0.0",
+    "@koa/router": "^15.7.0",
+    "dotenv": "^18.0.7",
+    "koa": "^3.2.1",
+    "koa-bodyparser": "^4.4.1",
+    "pg": "^8.23.1",
+    "sequelize": "^6.37.8"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14",
+    "sequelize-cli": "^6.6.5"
+  }
+}

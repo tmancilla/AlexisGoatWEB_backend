@@ -52,3 +52,53 @@ El servidor queda en `http://localhost:3000`. Para verificar que funciona y que 
 ```bash
 curl http://localhost:3000/health
 ```
+
+## Usuarios y autenticación básica — Entrega 3
+
+Los usuarios se almacenan en PostgreSQL mediante el modelo Usuario.
+Se implementaron las siguientes rutas:
+
+| Método | Ruta | Función |
+|---|---|---|
+| POST | /users | Crear usuario |
+| GET | /users | Listar usuarios |
+| GET | /users/:id | Consultar usuario |
+| PATCH | /users/:id | Actualizar usuario |
+| DELETE | /users/:id | Eliminar usuario |
+| POST | /auth/register | Registrar usuario |
+| POST | /auth/login | Iniciar sesión |
+
+Para registrar un administrador, se debe enviar `role: "Administrador"`
+y `codigoAdmin`. El servidor compara el código recibido con la variable
+`CODIGO_ADMIN`, que cada integrante debe configurar en su `.env`.
+
+### Ajustes al protocolo de E2
+
+Para E3 se implementó autenticación básica. Registro y login devuelven
+el usuario, sin token:
+
+```json
+{
+  "usuario": {
+    "id": 2,
+    "username": "jugador_auth",
+    "email": "auth@uc.cl",
+    "role": "Jugador"
+  }
+}
+```
+
+El hashing de contraseñas y la autenticación con JWT quedan para E4.
+Las respuestas no incluyen la contraseña.
+
+Los errores de validación y duplicados usan el middleware general:
+`VALIDACION_FALLIDA` (400) y `REGISTRO_DUPLICADO` (409).
+El login con credenciales incorrectas devuelve
+`CREDENCIALES_INVALIDAS` (401).
+
+### Verificación realizada
+
+Se probaron mediante curl la creación, consulta individual, listado,
+actualización y eliminación de usuarios; los errores por usuario
+inexistente, correo inválido e ID inválido; y el registro y login con
+credenciales correctas e incorrectas.

@@ -1,4 +1,4 @@
-const { ValidationError, UniqueConstraintError } = require('sequelize');
+const { ValidationError, UniqueConstraintError, ForeignKeyConstraintError } = require('sequelize');
 
 module.exports = async (ctx, next) => {
   try {
@@ -16,6 +16,9 @@ module.exports = async (ctx, next) => {
     } else if (err instanceof ValidationError) {
       ctx.status = 400;
       ctx.body = { codigo: 'VALIDACION_FALLIDA', mensaje: err.errors.map((e) => e.message).join('; ') };
+    } else if (err instanceof ForeignKeyConstraintError) {
+      ctx.status = 400;
+      ctx.body = { codigo: 'REFERENCIA_INVALIDA', mensaje: 'Se hace referencia a un registro que no existe.' };
     } else if (err.codigo) {
       ctx.status = err.status;
       ctx.body = { codigo: err.codigo, mensaje: err.message };

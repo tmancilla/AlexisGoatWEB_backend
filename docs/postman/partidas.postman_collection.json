@@ -1,0 +1,1257 @@
+{
+  "info": {
+    "_postman_id": "bcc7a11a-8656-4069-90a7-ee74300b443e",
+    "name": "Guerra del Pacífico — Partidas y lobby",
+    "description": "Endpoints de partidas y lobby (Entrega 3).\n\nAntes de usarla:\n\n1. Levantar el servidor (npm run dev) y cargar los datos de prueba (npm run db:seed).\n    \n2. Consultar GET /users y copiar el id de demo_libre1 y de demo_libre2 en las variables de la colección jugadorA y jugadorB.\n    \n3. Ejecutar las peticiones en orden. Las de la carpeta 1 deben hacerse de corrido: un lobby sin invitado expira a los 5 minutos.\n    \n\nEl usuario se identifica con el header X-Usuario-Id (reemplazo temporal del token JWT de la Entrega 4).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "53042977",
+    "_collection_link": "https://go.postman.co/collection/53042977-bcc7a11a-8656-4069-90a7-ee74300b443e?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "1. Lobby privado",
+      "item": [
+        {
+          "name": "Crear partida",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{jugadorA}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games"
+              ]
+            },
+            "description": "StartFragmentCrea una partida privada. El usuario del header queda como DUENO y el lobby espera un invitado por 5 minutos. Body vacío. Errores: 401 USUARIO_NO_IDENTIFICADO, 409 YA_ESTAS_EN_PARTIDA."
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{jugadorA}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "154"
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 14 Oct 2026 03:55:45 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"partidaId\": 67,\n    \"codigoInvitacion\": \"RG8PE4\",\n    \"estado\": \"ESPERANDO_JUGADOR\",\n    \"dueno\": {\n        \"id\": 82,\n        \"username\": \"demo_libre1\"\n    },\n    \"expiraEn\": \"2026-10-14T04:00:44.947Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Consultar partida",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{jugadorA}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaId}}"
+              ]
+            },
+            "description": "Crea una partida privada. El usuario del header queda como DUENO y el lobby espera un invitado por 5 minutos. Body vacío. Errores: 401 USUARIO_NO_IDENTIFICADO, 409 YA_ESTAS_EN_PARTIDA."
+          },
+          "response": [
+            {
+              "name": "200 Ok",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{jugadorA}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaId}}"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "268"
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 14 Oct 2026 12:15:09 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"partidaId\": 68,\n    \"estado\": \"ESPERANDO_JUGADOR\",\n    \"modo\": \"PRIVADA\",\n    \"rondaActual\": 0,\n    \"maxRondas\": 20,\n    \"expiraEn\": \"2026-10-14T12:18:44.129Z\",\n    \"jugadores\": [\n        {\n            \"id\": 82,\n            \"username\": \"demo_libre1\",\n            \"rolPartida\": \"DUENO\"\n        }\n    ],\n    \"createdAt\": \"2026-10-14T12:13:44.130Z\",\n    \"codigoInvitacion\": \"SKYNAB\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Listar partidas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{jugadorA}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games?estado=ESPERANDO_JUGADOR",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games"
+              ],
+              "query": [
+                {
+                  "key": "estado",
+                  "value": "ESPERANDO_JUGADOR"
+                },
+                {
+                  "key": "modo",
+                  "value": "PRIVADA",
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Lista las partidas, de la más nueva a la más antigua, sin el código de invitación. Query params opcionales: estado y modo. Error: 400 FILTRO_INVALIDO."
+          },
+          "response": [
+            {
+              "name": "200 Ok",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{jugadorA}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games?estado=ESPERANDO_JUGADOR",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games"
+                  ],
+                  "query": [
+                    {
+                      "key": "estado",
+                      "value": "ESPERANDO_JUGADOR"
+                    },
+                    {
+                      "key": "modo",
+                      "value": "PRIVADA",
+                      "type": "text",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "219"
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 14 Oct 2026 12:23:16 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n    {\n        \"partidaId\": 63,\n        \"estado\": \"ESPERANDO_JUGADOR\",\n        \"modo\": \"PRIVADA\",\n        \"rondaActual\": 0,\n        \"maxRondas\": 20,\n        \"expiraEn\": null,\n        \"jugadores\": [\n            {\n                \"id\": 81,\n                \"username\": \"demo_dueno\",\n                \"rolPartida\": \"DUENO\"\n            }\n        ],\n        \"createdAt\": \"2026-10-14T03:30:28.051Z\"\n    }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Unirse por código",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{jugadorB}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{codigo}}/join",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{codigo}}",
+                "join"
+              ]
+            },
+            "description": "El usuario del header se une como INVITADO usando el código. Body vacío. Errores: 404 CODIGO_INVALIDO, 409 PARTIDA_LLENA, 409 YA_ESTAS_EN_PARTIDA, 410 LOBBY_EXPIRADO."
+          },
+          "response": [
+            {
+              "name": "200 Ok",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{jugadorB}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{codigo}}/join",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{codigo}}",
+                    "join"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "175"
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 14 Oct 2026 12:40:38 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"partidaId\": 69,\n    \"estado\": \"LISTO_PARA_INICIAR\",\n    \"jugadores\": [\n        {\n            \"id\": 82,\n            \"username\": \"demo_libre1\",\n            \"rolPartida\": \"DUENO\"\n        },\n        {\n            \"id\": 83,\n            \"username\": \"demo_libre2\",\n            \"rolPartida\": \"INVITADO\"\n        }\n    ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Actualizar estado",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{jugadorA}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"estado\": \"DESPLIEGUE\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaId}}"
+              ]
+            },
+            "description": "Avanza el estado en orden: LISTO_PARA_INICIAR → DESPLIEGUE → EN_CURSO → TERMINADA. Body: { “estado”: “...” }. Errores: 400 CAMPOS_FALTANTES, 400 ESTADO_INVALIDO, 409 TRANSICION_INVALIDA."
+          },
+          "response": [
+            {
+              "name": "200 Ok",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{jugadorA}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"estado\": \"DESPLIEGUE\" }",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaId}}"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "298"
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 14 Oct 2026 12:46:13 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"partidaId\": 69,\n    \"estado\": \"DESPLIEGUE\",\n    \"modo\": \"PRIVADA\",\n    \"rondaActual\": 0,\n    \"maxRondas\": 20,\n    \"expiraEn\": null,\n    \"jugadores\": [\n        {\n            \"id\": 82,\n            \"username\": \"demo_libre1\",\n            \"rolPartida\": \"DUENO\"\n        },\n        {\n            \"id\": 83,\n            \"username\": \"demo_libre2\",\n            \"rolPartida\": \"INVITADO\"\n        }\n    ],\n    \"createdAt\": \"2026-10-14T12:40:18.276Z\",\n    \"codigoInvitacion\": \"CR38FQ\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancelar partida",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{jugadorA}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaId}}"
+              ]
+            },
+            "description": "Elimina una partida que aún no empieza. En privadas solo el dueño; en matchmaking, quien está en la cola (así se sale de ella). Errores: 403 SOLO_EL_DUENO_PUEDE_CANCELAR, 409 PARTIDA_YA_INICIADA."
+          },
+          "response": [
+            {
+              "name": "204 Sin cuerpo",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{jugadorA}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaId}}"
+                  ]
+                }
+              },
+              "status": "No Content",
+              "code": 204,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 14 Oct 2026 15:46:35 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Matchmaking",
+      "item": [
+        {
+          "name": "Buscar rival (A)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{jugadorA}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/matchmaking",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "matchmaking"
+              ]
+            },
+            "description": "Si alguien espera, se emparejan y la partida pasa a DESPLIEGUE (200 con el oponente). Si no, queda en cola (202 con partidaId y posicionEnCola) y el cliente vuelve a consultar cada pocos segundos. Error: 409 YA_ESTAS_EN_PARTIDA."
+          },
+          "response": [
+            {
+              "name": "202 Accepted",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{jugadorA}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/matchmaking",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "matchmaking"
+                  ]
+                }
+              },
+              "status": "Accepted",
+              "code": 202,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "55"
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 14 Oct 2026 15:49:48 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"estado\": \"BUSCANDO\",\n    \"partidaId\": 71,\n    \"posicionEnCola\": 1\n}"
+            },
+            {
+              "name": "200 Emparejado",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{jugadorA}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/matchmaking",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "matchmaking"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "84"
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 14 Oct 2026 15:52:49 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"partidaId\": 71,\n    \"estado\": \"DESPLIEGUE\",\n    \"oponente\": {\n        \"id\": 83,\n        \"username\": \"demo_libre2\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Buscar rival (B)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{jugadorB}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/matchmaking",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "matchmaking"
+              ]
+            },
+            "description": "B encuentra a A esperando en la cola: se unen en la misma partida, que pasa a DESPLIEGUE. Responde 200 con el oponente."
+          },
+          "response": [
+            {
+              "name": "200 Ok",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{jugadorB}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/matchmaking",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "matchmaking"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "84"
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 14 Oct 2026 15:51:52 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"partidaId\": 71,\n    \"estado\": \"DESPLIEGUE\",\n    \"oponente\": {\n        \"id\": 82,\n        \"username\": \"demo_libre1\"\n    }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Errores",
+      "item": [
+        {
+          "name": "Sin identificación",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/games",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "401 USUARIO_NO_IDENTIFICADO",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/games",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games"
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "107"
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 14 Oct 2026 15:53:58 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"codigo\": \"USUARIO_NO_IDENTIFICADO\",\n    \"mensaje\": \"Debes enviar el header X-Usuario-Id con el id del usuario.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "ID inválido",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{jugadorA}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "abc"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "400 ID_INVALIDO",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{jugadorA}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/abc",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "abc"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "71"
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 14 Oct 2026 15:56:20 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"codigo\": \"ID_INVALIDO\",\n    \"mensaje\": \"El ID debe ser un entero positivo.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Partida inexistente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{jugadorA}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "999999"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "404 PARTIDA_NO_EXISTE",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{jugadorA}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/999999",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "999999"
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "76"
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 14 Oct 2026 15:57:14 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"codigo\": \"PARTIDA_NO_EXISTE\",\n    \"mensaje\": \"No existe una partida con ese ID.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Código inexistente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{jugadorB}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/ZZZZZZ/join",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "ZZZZZZ",
+                "join"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "404 CODIGO_INVALIDO",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{jugadorB}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/ZZZZZZ/join",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "ZZZZZZ",
+                    "join"
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "83"
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 14 Oct 2026 19:03:57 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"codigo\": \"CODIGO_INVALIDO\",\n    \"mensaje\": \"El código no corresponde a ningún lobby.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Transición inválida",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{jugadorA}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"estado\": \"EN_CURSO\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/games/69",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "69"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "409 TRANSICION_INVALIDA",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{jugadorA}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"estado\": \"EN_CURSO\" }",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/games/69",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "69"
+                  ]
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "87"
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 14 Oct 2026 19:15:16 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"codigo\": \"TRANSICION_INVALIDA\",\n    \"mensaje\": \"No se puede pasar de TERMINADA a EN_CURSO.\"\n}"
+            }
+          ]
+        }
+      ],
+      "description": "Casos inválidos con su código HTTP y su codigo del protocolo. Todos los errores usan el formato { \"codigo\": \"...\", \"mensaje\": \"...\" }"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "jugadorA",
+      "value": "82"
+    },
+    {
+      "key": "jugadorB",
+      "value": "83"
+    },
+    {
+      "key": "partidaId",
+      "value": ""
+    },
+    {
+      "key": "codigo",
+      "value": ""
+    }
+  ]
+}

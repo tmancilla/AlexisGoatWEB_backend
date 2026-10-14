@@ -43,5 +43,18 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
 
+  Usuario.associate = (models) => {
+    Usuario.belongsToMany(models.Partida, {
+      through: models.JugadorPartida,
+      foreignKey: 'usuarioId',
+      otherKey: 'partidaId',
+      as: 'partidas',
+    });
+    Usuario.hasMany(models.JugadorPartida, {
+      foreignKey: 'usuarioId',
+      as: { singular: 'participacion', plural: 'participaciones' },
+    });
+  };
+
   return Usuario;
 };

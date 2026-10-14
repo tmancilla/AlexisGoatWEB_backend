@@ -7,6 +7,8 @@ const base = {
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
   dialect: 'postgres',
+  // guarda en la tabla SequelizeData los seeders que ya corrieron, asi db:seed no los repite y no choca con los unique
+  seederStorage: 'sequelize',
 };
 
 module.exports = {

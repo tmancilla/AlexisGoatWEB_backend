@@ -102,3 +102,133 @@ Se probaron mediante curl la creación, consulta individual, listado,
 actualización y eliminación de usuarios; los errores por usuario
 inexistente, correo inválido e ID inválido; y el registro y login con
 credenciales correctas e incorrectas.
+
+### Identificación del usuario (ajuste temporal al protocolo)
+
+En esta entrega no hay JWT, así que los endpoints de `/games` identifican al usuario con el header `X-Usuario-Id`, en lugar de `Authorization: Bearer <token>`. El valor es el `id` que devuelven `POST /auth/register` y `POST /auth/login`.
+
+Si el header falta, no es un número entero positivo o corresponde a un usuario inexistente, el servidor responde `401 USUARIO_NO_IDENTIFICADO`. En la Entrega 4 se reemplazará por el token JWT, cambiando solo el middleware `usuarioActual`.
+
+## Partidas y lobby — Entrega 3
+
+Modelos `Partida` y `JugadorPartida` (relación muchos a muchos entre `Usuario` y `Partida`, con rol `DUENO`/`INVITADO`, `numeroJugador` y recursos iniciales). El jugador 1 es el dueño, o el primero en la cola de matchmaking, y despliega en las filas 1 a 4; el 2 en las filas 7 a 10. Todos los endpoints requieren el header `X-Usuario-Id`.
+
+| Método | Ruta | Función | Éxito |
+|---|---|---|---|
+| POST | /games | Crear lobby privado | 201 |
+| GET | /games | Listar partidas (`?estado=`, `?modo=`) | 200 |
+| GET | /games/:id | Consultar partida | 200 |
+| POST | /games/:codigo/join | Unirse por código | 200 |
+| POST | /games/matchmaking | Buscar rival | 200 / 202 |
+| PATCH | /games/:id | Avanzar el estado | 200 |
+| DELETE | /games/:id | Cancelar partida o salir de la cola | 204 |
+
+**Reglas:** un usuario solo puede estar en una partida activa a la vez (`409`); el lobby expira a los 5 minutos sin invitado (`410`); la cola de matchmaking es una partida `MATCHMAKING` en espera.
+
+**Ajustes al protocolo de E2:** `partidaId` es un entero; la respuesta `202` de matchmaking incluye `partidaId`; se agregaron `GET /games`, `PATCH` y `DELETE` para completar el CRUD.
+
+**Datos de prueba:** `npm run db:seed` crea usuarios `demo_*` (contraseña `123456`) y partidas en distintos estados. El lobby `PRAT22` permite probar unirse por código con `demo_libre1`.
+
+**Flujo de prueba:** `POST /games` → `POST /games/<codigo>/join` → `GET /games/<id>` → `PATCH /games/<id>` → `DELETE /games/<id>`.
+
+**Postman:** [docs/postman/partidas.postman_collection.json](docs/postman/partidas.postman_collection.json). Poner en `jugadorA` y `jugadorB` los ids de `demo_libre1` y `demo_libre2` y ejecutar en orden.
+
+### Postman: usuarios y autenticación
+
+La colección está en
+[docs/postman/usuarios.postman_collection.json](docs/postman/usuarios.postman_collection.json).
+
+Con el backend funcionando, importar la colección en Postman y ejecutar
+las peticiones del 1 al 7 en orden. La primera guarda automáticamente
+el ID y nombre del usuario de prueba. Se prueban creación, listado,
+consulta, actualización, login, registro y eliminación.
+
+Las siete peticiones fueron ejecutadas y devolvieron los códigos HTTP
+esperados.
+
+## Integración con el frontend
+
+El registro y el inicio de sesión del frontend utilizan `fetch` para
+comunicarse con `/auth/register` y `/auth/login`. Las cuentas se guardan
+en PostgreSQL y permanecen disponibles después de recargar la página.
+
+### Configuración del frontend
+
+El frontend está en el repositorio
+[AlexisGoatWEB-Frontend-S2-26-2](https://github.com/IIC2513/AlexisGoatWEB-Frontend-S2-26-2).
+
+Desde la carpeta del frontend, instalar las dependencias y crear el
+archivo de configuración local:
+
+```bash
+npm install
+cp .env.example .env.local
+```
+
+El archivo `.env.local` debe contener:
+
+```env
+VITE_API_URL=http://localhost:3000
+```
+
+Si se modifica esta variable mientras el frontend está funcionando,
+reiniciar su servidor para que tome el cambio.
+
+### Ejecutar ambos proyectos
+
+PostgreSQL debe estar funcionando y la base de datos debe estar creada
+con sus migraciones aplicadas, siguiendo las instrucciones anteriores.
+
+En una terminal, desde la carpeta del backend:
+
+```bash
+npm run dev
+```
+
+En otra terminal, desde la carpeta del frontend:
+
+```bash
+npm run dev
+```
+
+Mantener ambas terminales abiertas y entrar a `http://localhost:5173`.
+
+La variable `FRONTEND_URL` del `.env` del backend debe coincidir con
+la dirección del frontend:
+
+```env
+FRONTEND_URL=http://localhost:5173
+```
+
+Si el frontend utiliza otro puerto, actualizar esta variable y reiniciar
+el backend.
+
+### Flujo de prueba de usuarios
+
+1. Abrir el frontend y entrar a la página de registro.
+2. Crear una cuenta con un nombre y correo nuevos, seleccionando el rol `Jugador`.
+3. Comprobar que se abre el menú y aparece el nombre de usuario en la barra superior.
+4. Recargar la página y comprobar que el nombre sigue apareciendo.
+5. Cerrar sesión.
+6. Iniciar sesión con la cuenta creada.
+7. Volver a cerrar sesión e intentar entrar directamente a `/menu`, `/preparacion` o `/tablero`: se debe redirigir a `/login`.
+
+Para registrar un administrador, ingresar el código configurado en
+`CODIGO_ADMIN` en el `.env` del backend.
+
+Si se ejecutaron los seeders, también se puede probar el login con
+`demo_libre1` y la contraseña `123456`.
+
+### Manejo de sesión
+
+El frontend guarda los datos públicos del usuario en `sessionStorage`,
+sin incluir su contraseña. La sesión se mantiene al recargar la misma
+pestaña y se elimina al cerrar sesión o cerrar la pestaña.
+
+Las rutas `/menu`, `/preparacion` y `/tablero` requieren que exista
+una sesión en el frontend. Esta comprobación controla la navegación;
+la autenticación del servidor mediante JWT queda para la Entrega 4.
+
+Las cuentas permanecen guardadas en PostgreSQL aunque se cierre sesión.
+Para identificar al usuario en las peticiones a `/games`, se utiliza
+el header `X-Usuario-Id` explicado anteriormente.

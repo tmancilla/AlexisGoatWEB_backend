@@ -1,0 +1,228 @@
+{
+  "info": {
+    "_postman_id": "1ee7ca3a-a2da-422d-9f35-f216330ee157",
+    "name": "Guerra del Pacifico - Usuarios y autenticacion",
+    "description": "Ejecutar las peticiones en orden con el backend funcionando. Se utilizan cuentas de prueba y se elimina el usuario creado para el CRUD.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "53043357",
+    "_collection_link": "https://go.postman.co/collection/53043357-1ee7ca3a-a2da-422d-9f35-f216330ee157?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "1. Crear usuario - 201",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code === 201) {",
+              "  const usuario = pm.response.json();",
+              "  pm.collectionVariables.set('usuarioId', usuario.id);",
+              "  pm.collectionVariables.set('username', usuario.username);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"postman_{{$timestamp}}\",\n  \"email\": \"postman_{{$timestamp}}@example.com\",\n  \"password\": \"1234\",\n  \"role\": \"Jugador\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/users",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users"
+          ]
+        },
+        "description": "Crea un usuario de prueba. Respuesta esperada: 201."
+      },
+      "response": []
+    },
+    {
+      "name": "2. Listar usuarios - 200",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/users",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users"
+          ]
+        },
+        "description": "Consulta el listado de usuarios. Respuesta esperada: 200."
+      },
+      "response": []
+    },
+    {
+      "name": "3. Consultar usuario - 200",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/users/{{usuarioId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users",
+            "{{usuarioId}}"
+          ]
+        },
+        "description": "Consulta el usuario creado en la primera peticion. Respuesta esperada: 200."
+      },
+      "response": []
+    },
+    {
+      "name": "4. Actualizar usuario - 200",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"actualizado_{{$timestamp}}@example.com\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/users/{{usuarioId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users",
+            "{{usuarioId}}"
+          ]
+        },
+        "description": "Actualiza el correo y conserva los otros campos. Respuesta esperada: 200."
+      },
+      "response": []
+    },
+    {
+      "name": "5. Iniciar sesion - 200",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"1234\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        },
+        "description": "Inicia sesion con el usuario de prueba. Respuesta esperada: 200 con el objeto usuario."
+      },
+      "response": []
+    },
+    {
+      "name": "6. Registrar cuenta - 201",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"registro_{{$timestamp}}\",\n  \"email\": \"registro_{{$timestamp}}@example.com\",\n  \"password\": \"1234\",\n  \"role\": \"Jugador\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/register",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "register"
+          ]
+        },
+        "description": "Registra una segunda cuenta, que queda guardada para probar el login desde el frontend. Respuesta esperada: 201 con el objeto usuario."
+      },
+      "response": []
+    },
+    {
+      "name": "7. Eliminar usuario - 204",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/users/{{usuarioId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users",
+            "{{usuarioId}}"
+          ]
+        },
+        "description": "Elimina exclusivamente el usuario creado en la primera peticion. Respuesta esperada: 204 sin cuerpo."
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "usuarioId",
+      "value": ""
+    },
+    {
+      "key": "username",
+      "value": ""
+    }
+  ]
+}

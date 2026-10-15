@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const { Op } = require('sequelize');
 const { sequelize, Partida, JugadorPartida, Usuario } = require('../models');
 const HttpError = require('../utils/HttpError');
+const despliegueService = require('./despliegue.service');
 
 const MINUTOS_LOBBY = 5;
 const CARACTERES_CODIGO = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -254,6 +255,7 @@ async function buscarRival(usuario) {
 
       await rival.addJugador(usuario, { through: { numeroJugador: 2 }, transaction });
       await rival.update({ estado: 'DESPLIEGUE' }, { transaction });
+      await despliegueService.iniciarDespliegue(rival, transaction);
 
       return { encontrado: true, partida: await obtenerConJugadores(rival.id, transaction) };
     }
@@ -304,7 +306,13 @@ async function actualizarPartida(id, datos, usuario) {
     cambios.terminadaEn = new Date();
   }
 
-  await partida.update(cambios);
+  await sequelize.transaction(async (transaction) => {
+    await partida.update(cambios, { transaction });
+
+    if (datos.estado === 'DESPLIEGUE') {
+      await despliegueService.iniciarDespliegue(partida, transaction);
+    }
+  });
 
   return obtenerConJugadores(partida.id);
 }

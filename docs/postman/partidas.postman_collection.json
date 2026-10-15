@@ -31,7 +31,7 @@
                 "games"
               ]
             },
-            "description": "StartFragmentCrea una partida privada. El usuario del header queda como DUENO y el lobby espera un invitado por 5 minutos. Body vacío. Errores: 401 USUARIO_NO_IDENTIFICADO, 409 YA_ESTAS_EN_PARTIDA."
+            "description": "Crea una partida privada. El usuario del header queda como DUENO y el lobby espera un invitado por 5 minutos. Body vacío. Errores: 401 USUARIO_NO_IDENTIFICADO, 409 YA_ESTAS_EN_PARTIDA."
           },
           "response": [
             {
@@ -157,11 +157,11 @@
                 },
                 {
                   "key": "Content-Length",
-                  "value": "268"
+                  "value": "284"
                 },
                 {
                   "key": "Date",
-                  "value": "Wed, 14 Oct 2026 12:15:09 GMT"
+                  "value": "Thu, 15 Oct 2026 02:01:05 GMT"
                 },
                 {
                   "key": "Connection",
@@ -173,7 +173,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n    \"partidaId\": 68,\n    \"estado\": \"ESPERANDO_JUGADOR\",\n    \"modo\": \"PRIVADA\",\n    \"rondaActual\": 0,\n    \"maxRondas\": 20,\n    \"expiraEn\": \"2026-10-14T12:18:44.129Z\",\n    \"jugadores\": [\n        {\n            \"id\": 82,\n            \"username\": \"demo_libre1\",\n            \"rolPartida\": \"DUENO\"\n        }\n    ],\n    \"createdAt\": \"2026-10-14T12:13:44.130Z\",\n    \"codigoInvitacion\": \"SKYNAB\"\n}"
+              "body": "{\n    \"partidaId\": 5,\n    \"estado\": \"ESPERANDO_JUGADOR\",\n    \"modo\": \"PRIVADA\",\n    \"rondaActual\": 0,\n    \"maxRondas\": 20,\n    \"expiraEn\": \"2026-10-15T02:02:57.084Z\",\n    \"jugadores\": [\n        {\n            \"id\": 2,\n            \"username\": \"demo_libre1\",\n            \"rolPartida\": \"DUENO\",\n            \"numeroJugador\": 1\n        }\n    ],\n    \"createdAt\": \"2026-10-15T01:57:57.087Z\",\n    \"codigoInvitacion\": \"BKFUHQ\"\n}"
             }
           ]
         },
@@ -263,11 +263,11 @@
                 },
                 {
                   "key": "Content-Length",
-                  "value": "219"
+                  "value": "492"
                 },
                 {
                   "key": "Date",
-                  "value": "Wed, 14 Oct 2026 12:23:16 GMT"
+                  "value": "Thu, 15 Oct 2026 02:01:39 GMT"
                 },
                 {
                   "key": "Connection",
@@ -279,7 +279,7 @@
                 }
               ],
               "cookie": [],
-              "body": "[\n    {\n        \"partidaId\": 63,\n        \"estado\": \"ESPERANDO_JUGADOR\",\n        \"modo\": \"PRIVADA\",\n        \"rondaActual\": 0,\n        \"maxRondas\": 20,\n        \"expiraEn\": null,\n        \"jugadores\": [\n            {\n                \"id\": 81,\n                \"username\": \"demo_dueno\",\n                \"rolPartida\": \"DUENO\"\n            }\n        ],\n        \"createdAt\": \"2026-10-14T03:30:28.051Z\"\n    }\n]"
+              "body": "[\n    {\n        \"partidaId\": 5,\n        \"estado\": \"ESPERANDO_JUGADOR\",\n        \"modo\": \"PRIVADA\",\n        \"rondaActual\": 0,\n        \"maxRondas\": 20,\n        \"expiraEn\": \"2026-10-15T02:02:57.084Z\",\n        \"jugadores\": [\n            {\n                \"id\": 2,\n                \"username\": \"demo_libre1\",\n                \"rolPartida\": \"DUENO\",\n                \"numeroJugador\": 1\n            }\n        ],\n        \"createdAt\": \"2026-10-15T01:57:57.087Z\"\n    },\n    {\n        \"partidaId\": 1,\n        \"estado\": \"ESPERANDO_JUGADOR\",\n        \"modo\": \"PRIVADA\",\n        \"rondaActual\": 0,\n        \"maxRondas\": 20,\n        \"expiraEn\": null,\n        \"jugadores\": [\n            {\n                \"id\": 1,\n                \"username\": \"demo_dueno\",\n                \"rolPartida\": \"DUENO\",\n                \"numeroJugador\": 1\n            }\n        ],\n        \"createdAt\": \"2026-10-14T23:41:45.157Z\"\n    }\n]"
             }
           ]
         },
@@ -349,11 +349,11 @@
                 },
                 {
                   "key": "Content-Length",
-                  "value": "175"
+                  "value": "208"
                 },
                 {
                   "key": "Date",
-                  "value": "Wed, 14 Oct 2026 12:40:38 GMT"
+                  "value": "Thu, 15 Oct 2026 02:02:05 GMT"
                 },
                 {
                   "key": "Connection",
@@ -365,7 +365,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n    \"partidaId\": 69,\n    \"estado\": \"LISTO_PARA_INICIAR\",\n    \"jugadores\": [\n        {\n            \"id\": 82,\n            \"username\": \"demo_libre1\",\n            \"rolPartida\": \"DUENO\"\n        },\n        {\n            \"id\": 83,\n            \"username\": \"demo_libre2\",\n            \"rolPartida\": \"INVITADO\"\n        }\n    ]\n}"
+              "body": "{\n    \"partidaId\": 5,\n    \"estado\": \"LISTO_PARA_INICIAR\",\n    \"jugadores\": [\n        {\n            \"id\": 2,\n            \"username\": \"demo_libre1\",\n            \"rolPartida\": \"DUENO\",\n            \"numeroJugador\": 1\n        },\n        {\n            \"id\": 3,\n            \"username\": \"demo_libre2\",\n            \"rolPartida\": \"INVITADO\",\n            \"numeroJugador\": 2\n        }\n    ]\n}"
             }
           ]
         },
@@ -1239,11 +1239,11 @@
     },
     {
       "key": "jugadorA",
-      "value": "82"
+      "value": "2"
     },
     {
       "key": "jugadorB",
-      "value": "83"
+      "value": "3"
     },
     {
       "key": "partidaId",

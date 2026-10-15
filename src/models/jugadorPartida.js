@@ -26,6 +26,14 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
 
+      numeroJugador: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        validate: {
+          isIn: { args: [[1, 2]], msg: 'El número de jugador debe ser 1 o 2.' },
+        },
+      },
+
       combustible: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -76,7 +84,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       tableName: 'JugadoresPartida',
-      indexes: [{ unique: true, fields: ['partidaId', 'usuarioId'] }],
+      indexes: [
+        { unique: true, fields: ['partidaId', 'usuarioId'] },
+        { unique: true, fields: ['partidaId', 'numeroJugador'] },
+      ],
     }
   );
 

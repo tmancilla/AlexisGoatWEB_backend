@@ -5,6 +5,7 @@ function jugadoresDe(partida) {
     id: jugador.id,
     username: jugador.username,
     rolPartida: jugador.JugadorPartida.rolPartida,
+    numeroJugador: jugador.JugadorPartida.numeroJugador,
   }));
 }
 

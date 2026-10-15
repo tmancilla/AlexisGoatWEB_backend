@@ -34,16 +34,10 @@ module.exports = {
       turnoActualId: {
         type: Sequelize.INTEGER,
         allowNull: true,
-        references: { model: 'Usuarios', key: 'id' },
-        onUpdate: 'CASCADE',
-        onDelete: 'SET NULL',
       },
       ganadorId: {
         type: Sequelize.INTEGER,
         allowNull: true,
-        references: { model: 'Usuarios', key: 'id' },
-        onUpdate: 'CASCADE',
-        onDelete: 'SET NULL',
       },
       expiraEn: {
         type: Sequelize.DATE,

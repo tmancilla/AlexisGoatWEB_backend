@@ -111,7 +111,7 @@ Si el header falta, no es un número entero positivo o corresponde a un usuario 
 
 ## Partidas y lobby — Entrega 3
 
-Modelos `Partida` y `JugadorPartida` (relación muchos a muchos entre `Usuario` y `Partida`, con rol `DUENO`/`INVITADO` y recursos iniciales). Todos los endpoints requieren el header `X-Usuario-Id`.
+Modelos `Partida` y `JugadorPartida` (relación muchos a muchos entre `Usuario` y `Partida`, con rol `DUENO`/`INVITADO`, `numeroJugador` y recursos iniciales). El jugador 1 es el dueño, o el primero en la cola de matchmaking, y despliega en las filas 1 a 4; el 2 en las filas 7 a 10. Todos los endpoints requieren el header `X-Usuario-Id`.
 
 | Método | Ruta | Función | Éxito |
 |---|---|---|---|

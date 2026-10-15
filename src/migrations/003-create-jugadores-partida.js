@@ -25,6 +25,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: true,
       },
+      numeroJugador: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
       combustible: {
         type: Sequelize.INTEGER,
         allowNull: false,
@@ -69,9 +73,35 @@ module.exports = {
       type: 'unique',
       name: 'jugadores_partida_partida_usuario_unico',
     });
+
+    await queryInterface.addConstraint('JugadoresPartida', {
+      fields: ['partidaId', 'numeroJugador'],
+      type: 'unique',
+      name: 'jugadores_partida_partida_numero_unico',
+    });
+
+    await queryInterface.addConstraint('Partidas', {
+      fields: ['turnoActualId'],
+      type: 'foreign key',
+      name: 'partidas_turno_actual_fkey',
+      references: { table: 'JugadoresPartida', field: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL',
+    });
+
+    await queryInterface.addConstraint('Partidas', {
+      fields: ['ganadorId'],
+      type: 'foreign key',
+      name: 'partidas_ganador_fkey',
+      references: { table: 'JugadoresPartida', field: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL',
+    });
   },
 
   async down(queryInterface) {
+    await queryInterface.removeConstraint('Partidas', 'partidas_ganador_fkey');
+    await queryInterface.removeConstraint('Partidas', 'partidas_turno_actual_fkey');
     await queryInterface.dropTable('JugadoresPartida');
   },
 };

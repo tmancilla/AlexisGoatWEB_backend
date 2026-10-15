@@ -4,7 +4,7 @@ const USUARIOS = [
   'demo_libre2',
   'demo_ana',
   'demo_beto',
-  'demo_carla',
+  'demo_karla',
   'demo_diego',
   'demo_elena',
   'demo_fede',
@@ -62,7 +62,6 @@ module.exports = {
           estado: 'EN_CURSO',
           modo: 'MATCHMAKING',
           rondaActual: 4,
-          turnoActualId: id.demo_carla,
           createdAt: haceMinutos(25),
           updatedAt: haceMinutos(1),
         }),
@@ -71,7 +70,6 @@ module.exports = {
           estado: 'TERMINADA',
           modo: 'PRIVADA',
           rondaActual: 20,
-          ganadorId: id.demo_elena,
           terminadaEn: haceMinutos(30),
           createdAt: haceMinutos(90),
           updatedAt: haceMinutos(30),
@@ -95,13 +93,14 @@ module.exports = {
       ...datos,
     });
 
-    await queryInterface.bulkInsert('JugadoresPartida', [
-      jugador(lobby.id, 'demo_dueno', { rolPartida: 'DUENO' }),
+    const participaciones = await queryInterface.bulkInsert('JugadoresPartida', [
+      jugador(lobby.id, 'demo_dueno', { rolPartida: 'DUENO', numeroJugador: 1 }),
 
-      jugador(listo.id, 'demo_ana', { rolPartida: 'DUENO' }),
-      jugador(listo.id, 'demo_beto', { rolPartida: 'INVITADO' }),
+      jugador(listo.id, 'demo_ana', { rolPartida: 'DUENO', numeroJugador: 1 }),
+      jugador(listo.id, 'demo_beto', { rolPartida: 'INVITADO', numeroJugador: 2 }),
 
-      jugador(enCurso.id, 'demo_carla', {
+      jugador(enCurso.id, 'demo_karla', {
+        numeroJugador: 1,
         combustible: 9,
         municion: 6,
         chatarra: 4,
@@ -109,6 +108,7 @@ module.exports = {
         listo: true,
       }),
       jugador(enCurso.id, 'demo_diego', {
+        numeroJugador: 2,
         combustible: 7,
         municion: 5,
         chatarra: 3,
@@ -117,6 +117,7 @@ module.exports = {
 
       jugador(terminada.id, 'demo_elena', {
         rolPartida: 'DUENO',
+        numeroJugador: 1,
         combustible: 4,
         municion: 2,
         chatarra: 6,
@@ -126,6 +127,7 @@ module.exports = {
       }),
       jugador(terminada.id, 'demo_fede', {
         rolPartida: 'INVITADO',
+        numeroJugador: 2,
         combustible: 1,
         municion: 0,
         chatarra: 2,
@@ -133,7 +135,22 @@ module.exports = {
         listo: true,
         puntajeFinal: 30,
       }),
-    ]);
+    ], { returning: true });
+
+    const participacion = (partidaId, username) =>
+      participaciones.find((p) => p.partidaId === partidaId && p.usuarioId === id[username]).id;
+
+    await queryInterface.bulkUpdate(
+      'Partidas',
+      { turnoActualId: participacion(enCurso.id, 'demo_karla') },
+      { id: enCurso.id }
+    );
+
+    await queryInterface.bulkUpdate(
+      'Partidas',
+      { ganadorId: participacion(terminada.id, 'demo_elena') },
+      { id: terminada.id }
+    );
   },
 
   async down(queryInterface) {

@@ -16,7 +16,7 @@ const INCLUIR_JUGADORES = {
   model: Usuario,
   as: 'jugadores',
   attributes: ['id', 'username'],
-  through: { attributes: ['rolPartida'] },
+  through: { attributes: ['rolPartida', 'numeroJugador'] },
 };
 
 function validarId(id) {
@@ -176,7 +176,7 @@ async function crearPartida(usuario) {
       { transaction }
     );
 
-    await partida.addJugador(usuario, { through: { rolPartida: 'DUENO' }, transaction });
+    await partida.addJugador(usuario, { through: { rolPartida: 'DUENO', numeroJugador: 1 }, transaction });
 
     return partida;
   });
@@ -205,7 +205,7 @@ async function unirsePorCodigo(codigo, usuario) {
     await eliminarLobbiesExpirados(transaction);
     await asegurarSinPartidaActiva(usuario.id, transaction);
 
-    await partida.addJugador(usuario, { through: { rolPartida: 'INVITADO' }, transaction });
+    await partida.addJugador(usuario, { through: { rolPartida: 'INVITADO', numeroJugador: 2 }, transaction });
     await partida.update({ estado: 'LISTO_PARA_INICIAR', expiraEn: null }, { transaction });
 
     return obtenerConJugadores(partida.id, transaction);
@@ -252,7 +252,7 @@ async function buscarRival(usuario) {
         await actual.destroy({ transaction });
       }
 
-      await rival.addJugador(usuario, { transaction });
+      await rival.addJugador(usuario, { through: { numeroJugador: 2 }, transaction });
       await rival.update({ estado: 'DESPLIEGUE' }, { transaction });
 
       return { encontrado: true, partida: await obtenerConJugadores(rival.id, transaction) };
@@ -262,7 +262,7 @@ async function buscarRival(usuario) {
 
     if (!enCola) {
       partidaEnCola = await Partida.create({ modo: 'MATCHMAKING' }, { transaction });
-      await partidaEnCola.addJugador(usuario, { transaction });
+      await partidaEnCola.addJugador(usuario, { through: { numeroJugador: 1 }, transaction });
     }
 
     return {

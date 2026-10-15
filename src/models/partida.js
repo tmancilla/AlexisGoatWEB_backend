@@ -98,8 +98,8 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'partidaId',
       as: { singular: 'participacion', plural: 'participaciones' },
     });
-    Partida.belongsTo(models.Usuario, { foreignKey: 'turnoActualId', as: 'turnoActual' });
-    Partida.belongsTo(models.Usuario, { foreignKey: 'ganadorId', as: 'ganador' });
+    Partida.belongsTo(models.JugadorPartida, { foreignKey: 'turnoActualId', as: 'turnoActual' });
+    Partida.belongsTo(models.JugadorPartida, { foreignKey: 'ganadorId', as: 'ganador' });
   };
 
   Partida.ESTADOS = ESTADOS;

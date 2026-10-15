@@ -32,6 +32,10 @@ const MAX_ACCIONES_POR_BARCO = 2;
 // regla 5, lo recibe el jugador que no parte en el sorteo del primer turno
 const COMBUSTIBLE_EXTRA_SEGUNDO = 2;
 
+const SEGUNDOS_DESPLIEGUE = 120;
+
+const SEGUNDOS_TURNO = 180;
+
 module.exports = {
   TAMANO_TABLERO,
   ZONAS_DESPLIEGUE,
@@ -41,4 +45,6 @@ module.exports = {
   CASILLAS_ESPECIALES,
   MAX_ACCIONES_POR_BARCO,
   COMBUSTIBLE_EXTRA_SEGUNDO,
+  SEGUNDOS_DESPLIEGUE,
+  SEGUNDOS_TURNO,
 };

@@ -42,6 +42,16 @@ function enZonaDespliegue(casilla, numeroJugador) {
   return casilla.y >= zona.desde && casilla.y <= zona.hasta;
 }
 
+function casillasDeZona(numeroJugador) {
+  const zona = ZONAS_DESPLIEGUE[numeroJugador];
+  if (!zona) return [];
+  const casillas = [];
+  for (let y = zona.desde; y <= zona.hasta; y += 1) {
+    for (let x = 1; x <= TAMANO_TABLERO; x += 1) casillas.push({ x, y });
+  }
+  return casillas;
+}
+
 // fisher-yates con crypto para que el azar salga del servidor (regla 34) y no se pueda predecir
 function mezclar(lista) {
   const copia = [...lista];
@@ -79,6 +89,7 @@ module.exports = {
   distancia,
   casillasEnRadio,
   enZonaDespliegue,
+  casillasDeZona,
   mezclar,
   generarCasillas,
 };

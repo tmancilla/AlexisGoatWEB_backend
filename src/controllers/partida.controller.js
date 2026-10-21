@@ -1,4 +1,5 @@
 const partidaService = require('../services/partida.service');
+const estadoService = require('../services/estado.service');
 
 function jugadoresDe(partida) {
   return partida.jugadores.map((jugador) => ({
@@ -38,9 +39,10 @@ async function listarPartidas(ctx) {
 
 async function obtenerPartida(ctx) {
   const partida = await partidaService.obtenerPartida(ctx.params.id, ctx.state.usuario);
+  const estado = await estadoService.armarEstado(partida.id, ctx.state.usuario.id);
 
   ctx.status = 200;
-  ctx.body = detallePartida(partida);
+  ctx.body = estado || detallePartida(partida);
 }
 
 async function crearPartida(ctx) {

@@ -1,5 +1,6 @@
 const { sequelize, Partida, JugadorPartida, Barco } = require('../models');
 const HttpError = require('../utils/HttpError');
+const { validarId } = require('../utils/validaciones');
 const tableroService = require('./tablero.service');
 const { clave, dentroDelTablero, enZonaDespliegue, casillasDeZona, mezclar } = require('../utils/tablero');
 const {
@@ -9,14 +10,6 @@ const {
   COMBUSTIBLE_EXTRA_SEGUNDO,
   SEGUNDOS_DESPLIEGUE,
   SEGUNDOS_TURNO} = require('../config/reglas');
-
-function validarId(id) {
-  const partidaId = Number(id);
-  if (!Number.isInteger(partidaId) || partidaId <= 0) {
-    throw new HttpError(400, 'ID_INVALIDO', 'El ID debe ser un entero positivo.');
-  }
-  return partidaId;
-}
 
 function despliegueInvalido(mensaje) {
   return new HttpError(400, 'DESPLIEGUE_INVALIDO', mensaje);

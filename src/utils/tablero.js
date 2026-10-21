@@ -36,6 +36,26 @@ function casillasEnRadio(centro, radio) {
   return casillas;
 }
 
+function casillasVistas(barcos) {
+  return new Set(barcos
+    .filter((barco) => barco.aFlote)
+    .flatMap((barco) => casillasEnRadio(barco, barco.deteccion))
+    .map(clave));
+}
+
+function buscarRuta(origen, destino, bloqueadas) {
+  if (origen.x === destino.x && origen.y === destino.y) return [];
+  const pasos = [];
+  if (destino.x !== origen.x) pasos.push({ x: origen.x + Math.sign(destino.x - origen.x), y: origen.y });
+  if (destino.y !== origen.y) pasos.push({ x: origen.x, y: origen.y + Math.sign(destino.y - origen.y) });
+  for (const paso of pasos) {
+    if (bloqueadas.has(clave(paso))) continue;
+    const resto = buscarRuta(paso, destino, bloqueadas);
+    if (resto) return [paso, ...resto];
+  }
+  return null;
+}
+
 function enZonaDespliegue(casilla, numeroJugador) {
   const zona = ZONAS_DESPLIEGUE[numeroJugador];
   if (!zona || !dentroDelTablero(casilla)) return false;
@@ -88,6 +108,8 @@ module.exports = {
   dentroDelTablero,
   distancia,
   casillasEnRadio,
+  casillasVistas,
+  buscarRuta,
   enZonaDespliegue,
   casillasDeZona,
   mezclar,

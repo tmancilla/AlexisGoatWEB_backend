@@ -1,6 +1,6 @@
-const { Partida, JugadorPartida, Casilla, CasillaRevelada } = require('../models');
+const { Partida, JugadorPartida, Casilla, CasillaRevelada, Accion } = require('../models');
 const { resolverDespliegueVencido } = require('./despliegue.service');
-const { clave, casillasEnRadio } = require('../utils/tablero');
+const { clave, casillasVistas } = require('../utils/tablero');
 const { BARCOS, TIPOS_BARCO, CASILLAS_DE_RECURSO } = require('../config/reglas');
 
 const ESTADOS_DE_JUEGO = ['DESPLIEGUE', 'EN_CURSO', 'TERMINADA'];
@@ -75,13 +75,17 @@ async function armarEstado(partidaId, usuarioId) {
   const barcosRival = rival ? ordenarPorTipo(rival.barcos) : [];
   const turno = jugadores.find((jugador) => jugador.id === partida.turnoActualId);
 
+  const accionesDeLaRonda = partida.estado === 'EN_CURSO'
+    ? await Accion.findAll({ where: { jugadorPartidaId: yo.id, ronda: partida.rondaActual }, attributes: ['barcoId'] })
+    : [];
+  const accionesPorBarco = Object.fromEntries(misBarcos.map((barco) => [
+    barco.id,
+    accionesDeLaRonda.filter((accion) => accion.barcoId === barco.id).length]));
+
   let visibles = [];
   let contactos = [];
   if (ESTADOS_CON_VISION.includes(partida.estado)) {
-    const vistas = new Set(misBarcos
-      .filter((barco) => barco.aFlote)
-      .flatMap((barco) => casillasEnRadio(barco, barco.deteccion))
-      .map(clave));
+    const vistas = casillasVistas(misBarcos);
     const reveladas = new Map((await CasillaRevelada.findAll({ where: { jugadorPartidaId: yo.id } }))
       .map((revelada) => [revelada.casillaId, revelada]));
     const casillas = await Casilla.findAll({ where: { partidaId }, order: [['y', 'ASC'], ['x', 'ASC']] });
@@ -112,7 +116,7 @@ async function armarEstado(partidaId, usuarioId) {
       conectado: true,
       recursos: { combustible: yo.combustible, municion: yo.municion, chatarra: yo.chatarra },
       accionesRestantes: yo.accionesRestantes,
-      accionesPorBarco: {},
+      accionesPorBarco,
       flota: misBarcos.map(barcoPropio)},
     rival: rival
       ? {

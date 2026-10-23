@@ -1,5 +1,6 @@
 const { sequelize, Partida, JugadorPartida, Barco, Casilla, CasillaRevelada, Accion } = require('../models');
 const HttpError = require('../utils/HttpError');
+const partidaService = require('./partida.service');
 const { validarId } = require('../utils/validaciones');
 const { clave, dentroDelTablero, distancia, casillasVistas, buscarRuta } = require('../utils/tablero');
 const {
@@ -178,6 +179,74 @@ async function realizarAccion(id, usuario, datos) {
   });
 }
 
+async function listarAcciones(id, usuario) {
+  await partidaService.obtenerPartida(id, usuario);
+
+  return Accion.findAll({
+    include: [{
+      association: 'jugadorPartida',
+      where: { partidaId: validarId(id), usuarioId: usuario.id },
+      attributes: [],
+    }],
+    order: [['id', 'ASC']],
+  });
+}
+
+async function obtenerAccion(id, accionId, usuario) {
+  await partidaService.obtenerPartida(id, usuario);
+
+  const accion = await Accion.findOne({
+    where: { id: validarId(accionId) },
+    include: [{
+      association: 'jugadorPartida',
+      where: { partidaId: validarId(id), usuarioId: usuario.id },
+      attributes: [],
+    }],
+  });
+
+  if (!accion) {
+    throw new HttpError(404, 'ACCION_NO_EXISTE', 'No existe una accion tuya con ese ID en esta partida.');
+  }
+
+  return accion;
+}
+
+async function actualizarAccion(id, accionId, usuario, datos) {
+  const accion = await obtenerAccion(id, accionId, usuario);
+  const partida = await Partida.findByPk(validarId(id));
+
+  if (partida.estado !== 'TERMINADA') {
+    throw new HttpError(409, 'ACCION_NO_EDITABLE', 'Solo se pueden modificar registros de partidas terminadas.');
+  }
+
+  if (datos.tipo === undefined && datos.ronda === undefined && datos.resultado === undefined) {
+    throw new HttpError(400, 'CAMPOS_FALTANTES', 'Debes enviar tipo, ronda o resultado para actualizar.');
+  }
+
+  await accion.update({
+    tipo: datos.tipo,
+    ronda: datos.ronda,
+    resultado: datos.resultado,
+  });
+
+  return accion;
+}
+
+async function eliminarAccion(id, accionId, usuario) {
+  const accion = await obtenerAccion(id, accionId, usuario);
+  const partida = await Partida.findByPk(validarId(id));
+
+  if (partida.estado !== 'TERMINADA') {
+    throw new HttpError(409, 'ACCION_NO_EDITABLE', 'Solo se pueden modificar registros de partidas terminadas.');
+  }
+
+  await accion.destroy();
+}
+
 module.exports = {
   realizarAccion,
+  listarAcciones,
+  obtenerAccion,
+  actualizarAccion,
+  eliminarAccion,
 };

@@ -128,6 +128,7 @@ Modelos `Partida` y `JugadorPartida` (relación muchos a muchos entre `Usuario` 
 **Ajustes al protocolo de E2:** `partidaId` es un entero; la respuesta `202` de matchmaking incluye `partidaId`; se agregaron `GET /games`, `PATCH` y `DELETE` para completar el CRUD.
 
 **Datos de prueba:** `npm run db:seed` crea usuarios `demo_*` (contraseña `123456`) y partidas en distintos estados. El lobby `PRAT22` permite probar unirse por código con `demo_libre1`.
+Las partidas en curso y terminada incluyen un tablero fijo (100 casillas, con las 12 especiales de la regla 7) y la flota de cada jugador, así que se pueden consultar con `GET /games/:id` y, en la partida en curso, `demo_karla` puede jugar su turno.
 
 **Flujo de prueba:** `POST /games` → `POST /games/<codigo>/join` → `GET /games/<id>` → `PATCH /games/<id>` → `DELETE /games/<id>`.
 
@@ -148,9 +149,10 @@ esperados.
 
 ## Integración con el frontend
 
-El registro y el inicio de sesión del frontend utilizan `fetch` para
-comunicarse con `/auth/register` y `/auth/login`. Las cuentas se guardan
-en PostgreSQL y permanecen disponibles después de recargar la página.
+El registro, el inicio de sesión y el menú del frontend utilizan `fetch` para
+comunicarse con el backend: `/auth/register`, `/auth/login` y los endpoints de
+`/games` (crear partida, unirse por código, buscar rival y cancelar). Las cuentas
+y partidas se guardan en PostgreSQL y permanecen disponibles después de recargar la página.
 
 ### Configuración del frontend
 

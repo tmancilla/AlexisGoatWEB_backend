@@ -2,6 +2,8 @@ const Router = require('@koa/router');
 const partidaController = require('../controllers/partida.controller');
 const despliegueController = require('../controllers/despliegue.controller');
 const accionController = require('../controllers/accion.controller');
+const turnoController = require('../controllers/turno.controller');
+const eventoController = require('../controllers/evento.controller');
 const usuarioActual = require('../middlewares/usuarioActual');
 
 const router = new Router({
@@ -20,6 +22,13 @@ router.get('/:id/acciones', accionController.listarAcciones);
 router.get('/:id/acciones/:accionId', accionController.obtenerAccion);
 router.patch('/:id/acciones/:accionId', accionController.actualizarAccion);
 router.delete('/:id/acciones/:accionId', accionController.eliminarAccion);
+router.post('/:id/terminar-turno', turnoController.terminarTurno);
+router.post('/:id/abandonar', turnoController.abandonar);
+router.get('/:id/eventos', eventoController.listarEventos);
+router.get('/:id/eventos/:eventoId', eventoController.obtenerEvento);
+router.post('/:id/eventos', eventoController.crearEvento);
+router.patch('/:id/eventos/:eventoId', eventoController.actualizarEvento);
+router.delete('/:id/eventos/:eventoId', eventoController.eliminarEvento);
 router.get('/:id', partidaController.obtenerPartida);
 router.patch('/:id', partidaController.actualizarPartida);
 router.delete('/:id', partidaController.cancelarPartida);

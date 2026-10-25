@@ -234,3 +234,25 @@ la autenticación del servidor mediante JWT queda para la Entrega 4.
 Las cuentas permanecen guardadas en PostgreSQL aunque se cierre sesión.
 Para identificar al usuario en las peticiones a `/games`, se utiliza
 el header `X-Usuario-Id` explicado anteriormente.
+
+## Turnos, abandono y eventos de partida
+
+| Método | Ruta | Función | Éxito |
+|---|---|---|---|
+| POST | /games/:id/terminar-turno | Termina el turno del jugador activo | 200 |
+| POST | /games/:id/abandonar | Abandona una partida en despliegue o en curso; gana el rival | 200 |
+| GET | /games/:id/eventos | Lista las cartas de evento reveladas, por ronda | 200 |
+| GET | /games/:id/eventos/:eventoId | Consulta una carta | 200 |
+| POST | /games/:id/eventos | Crea una carta (solo administrador) | 201 |
+| PATCH | /games/:id/eventos/:eventoId | Modifica una carta (solo administrador) | 200 |
+| DELETE | /games/:id/eventos/:eventoId | Elimina una carta (solo administrador) | 204 |
+
+**Turnos:** al terminar el turno, el rival recolecta los recursos de las casillas que ocupa (regla 8), recupera sus 3 acciones (regla 14) y recibe 1 de combustible de reserva si quedó sin combustible ni casillas de recurso (regla 18). La ronda cambia cuando el turno vuelve al jugador que inició la partida, y en ese momento el servidor revela una carta al azar (regla 33). Si el turno vence (3 minutos), el servidor lo cierra al consultar la partida (regla 15). Al terminar la ronda 20 se calcula el puntaje de la regla 36 con los desempates de la regla 37.
+
+**Abandono:** termina la partida con victoria del rival (regla 38). En el lobby se sigue usando `DELETE /games/:id`.
+
+**Estado de la partida:** `GET /games/:id` ahora incluye `eventoRonda` (`{ carta, efecto }`) y, cuando la partida termina, `resultadoFinal` con `motivo` (`FLOTA_DESTRUIDA`, `LIMITE_RONDAS`, `ABANDONO` o `EMPATE`), `ganador` y `puntajes` por jugador.
+
+**Ajustes al protocolo de E2:** `terminar-turno` y `abandonar` responden con un resumen JSON en vez de cuerpo vacío, porque aún no hay WebSocket. Los errores de juego usan `422`, igual que las acciones. Las cartas se revelan y se muestran, pero sus efectos todavía no se aplican.
+
+**Flujo de prueba:** `demo_karla` (turno suyo, ronda 4) → `POST /games/3/terminar-turno` → `demo_diego` → `POST /games/3/terminar-turno` → empieza la ronda 5 con una carta nueva (`GET /games/3/eventos`).

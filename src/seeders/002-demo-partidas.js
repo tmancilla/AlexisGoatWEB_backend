@@ -1,4 +1,4 @@
-const { BARCOS } = require('../config/reglas');
+const { BARCOS, CARTAS_EVENTO } = require('../config/reglas');
 
 const USUARIOS = [
   'demo_dueno',
@@ -122,6 +122,7 @@ module.exports = {
         combustible: 9,
         municion: 6,
         chatarra: 4,
+        accionesRestantes: 2,
         listo: true,
       }),
       jugador(enCurso.id, 'demo_diego', {
@@ -159,13 +160,20 @@ module.exports = {
 
     await queryInterface.bulkUpdate(
       'Partidas',
-      { turnoActualId: participacion(enCurso.id, 'demo_karla') },
+      {
+        turnoActualId: participacion(enCurso.id, 'demo_karla'),
+        jugadorInicialId: participacion(enCurso.id, 'demo_karla'),
+      },
       { id: enCurso.id }
     );
 
     await queryInterface.bulkUpdate(
       'Partidas',
-      { ganadorId: participacion(terminada.id, 'demo_elena') },
+      {
+        ganadorId: participacion(terminada.id, 'demo_elena'),
+        jugadorInicialId: participacion(terminada.id, 'demo_elena'),
+        motivoFin: 'FLOTA_DESTRUIDA',
+      },
       { id: terminada.id }
     );
 
@@ -192,7 +200,6 @@ module.exports = {
     };
 
     await queryInterface.bulkInsert('Casillas', [
-      ...tablero(enCurso.id),
       ...tablero(terminada.id, [{ x: 7, y: 4 }, { x: 3, y: 6 }]),
     ]);
 
@@ -215,15 +222,6 @@ module.exports = {
     const hundido = { cascoActual: 0, aFlote: false };
 
     await queryInterface.bulkInsert('Barcos', [
-      barco(enCurso.id, 'demo_karla', 'LANCHA', 6, 5),
-      barco(enCurso.id, 'demo_karla', 'FRAGATA', 3, 3),
-      barco(enCurso.id, 'demo_karla', 'DESTRUCTOR', 4, 2),
-      barco(enCurso.id, 'demo_karla', 'ACORAZADO', 2, 1),
-      barco(enCurso.id, 'demo_diego', 'LANCHA', 8, 6),
-      barco(enCurso.id, 'demo_diego', 'FRAGATA', 7, 8),
-      barco(enCurso.id, 'demo_diego', 'DESTRUCTOR', 5, 8, { cascoActual: 2 }),
-      barco(enCurso.id, 'demo_diego', 'ACORAZADO', 9, 9),
-
       barco(terminada.id, 'demo_elena', 'LANCHA', 5, 6, hundido),
       barco(terminada.id, 'demo_elena', 'FRAGATA', 6, 7, { cascoActual: 1 }),
       barco(terminada.id, 'demo_elena', 'DESTRUCTOR', 7, 7),
@@ -232,6 +230,22 @@ module.exports = {
       barco(terminada.id, 'demo_fede', 'FRAGATA', 6, 9, hundido),
       barco(terminada.id, 'demo_fede', 'DESTRUCTOR', 7, 9, hundido),
       barco(terminada.id, 'demo_fede', 'ACORAZADO', 9, 8, hundido),
+    ]);
+
+    const evento = (partidaId, ronda, tipoCarta) => ({
+      partidaId,
+      ronda,
+      tipoCarta,
+      descripcion: CARTAS_EVENTO[tipoCarta],
+      createdAt: ahora,
+      updatedAt: ahora,
+    });
+
+    await queryInterface.bulkInsert('EventosPartida', [
+      evento(enCurso.id, 1, 'MAREA_ALTA'),
+      evento(enCurso.id, 2, 'SABOTAJE'),
+      evento(enCurso.id, 3, 'BOTIN_FLOTANTE'),
+      evento(enCurso.id, 4, 'TORMENTA'),
     ]);
   },
 

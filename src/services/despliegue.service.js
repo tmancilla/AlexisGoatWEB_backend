@@ -2,6 +2,7 @@ const { sequelize, Partida, JugadorPartida, Barco } = require('../models');
 const HttpError = require('../utils/HttpError');
 const { validarId } = require('../utils/validaciones');
 const tableroService = require('./tablero.service');
+const { revelarEvento } = require('./turno.service');
 const { clave, dentroDelTablero, enZonaDespliegue, casillasDeZona, mezclar } = require('../utils/tablero');
 const {
   BARCOS,
@@ -78,7 +79,9 @@ async function iniciarPartida(partida, transaction) {
     estado: 'EN_CURSO',
     rondaActual: 1,
     turnoActualId: primero.id,
+    jugadorInicialId: primero.id,
     expiraEn: new Date(Date.now() + SEGUNDOS_TURNO * 1000)}, { transaction });
+  await revelarEvento(partida, 1, transaction);
 }
 
 async function resolverDespliegueVencido(partidaId) {

@@ -1,5 +1,6 @@
 const { Partida, JugadorPartida, Casilla, CasillaRevelada, Accion } = require('../models');
 const { resolverDespliegueVencido } = require('./despliegue.service');
+const { resolverTurnoVencido, eventoDeRonda, armarResultado } = require('./turno.service');
 const { clave, casillasVistas } = require('../utils/tablero');
 const { BARCOS, TIPOS_BARCO, CASILLAS_DE_RECURSO } = require('../config/reglas');
 
@@ -57,6 +58,7 @@ function casillasVisibles(casillas, vistas, reveladas, barcosAFlote) {
 
 async function armarEstado(partidaId, usuarioId) {
   await resolverDespliegueVencido(partidaId);
+  await resolverTurnoVencido(partidaId);
 
   const partida = await Partida.findByPk(partidaId);
   if (!partida || !ESTADOS_DE_JUEGO.includes(partida.estado)) return null;
@@ -107,7 +109,7 @@ async function armarEstado(partidaId, usuarioId) {
     jugadorActivo: turno ? turno.usuarioId : null,
     turnoExpiraEn: partida.estado === 'EN_CURSO' ? partida.expiraEn : null,
     despliegueExpiraEn: partida.estado === 'DESPLIEGUE' ? partida.expiraEn : null,
-    eventoRonda: null,
+    eventoRonda: await eventoDeRonda(partida),
     yo: {
       jugadorId: yo.usuarioId,
       username: yo.usuario.username,
@@ -130,7 +132,7 @@ async function armarEstado(partidaId, usuarioId) {
       : null,
     casillasVisibles: visibles,
     contactosEnemigos: contactos,
-    resultadoFinal: null};
+    resultadoFinal: await armarResultado(partida)};
 }
 
 module.exports = {

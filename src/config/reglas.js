@@ -44,6 +44,33 @@ const CHATARRA_NAUFRAGIO = 3;
 
 const CHATARRA_HUNDIMIENTO = 2;
 
+const ACCIONES_POR_TURNO = 3;
+
+// regla 8, lo que entrega cada casilla de recurso ocupada al inicio del turno
+const RECOLECCION = {
+  POZO_PETROLERO: { recurso: 'combustible', cantidad: 2 },
+  DEPOSITO_MUNICION: { recurso: 'municion', cantidad: 2 }};
+
+// regla 18
+const COMBUSTIBLE_RESERVA = 1;
+
+// regla 33
+const CARTAS_EVENTO = {
+  TORMENTA: 'Radio de detección -1 para todos los barcos esta ronda.',
+  BOTIN_FLOTANTE: 'Aparece un bono de 2 de combustible o munición en una casilla vacía al azar.',
+  SABOTAJE: 'Un jugador elegido al azar pierde 1 de munición.',
+  MAREA_ALTA: 'Las corrientes peligrosas no hacen daño esta ronda.'};
+
+// regla 36
+const PUNTOS = {
+  BARCO_A_FLOTE: 5,
+  CASCO: 1,
+  ENEMIGO_HUNDIDO: 10,
+  CASILLA_RECURSO: 3,
+  MEJORA: 2};
+
+const MOTIVOS_FIN = ['FLOTA_DESTRUIDA', 'LIMITE_RONDAS', 'ABANDONO', 'EMPATE'];
+
 module.exports = {
   TAMANO_TABLERO,
   ZONAS_DESPLIEGUE,
@@ -59,4 +86,10 @@ module.exports = {
   TIPOS_ACCION,
   CHATARRA_NAUFRAGIO,
   CHATARRA_HUNDIMIENTO,
+  ACCIONES_POR_TURNO,
+  RECOLECCION,
+  COMBUSTIBLE_RESERVA,
+  CARTAS_EVENTO,
+  PUNTOS,
+  MOTIVOS_FIN,
 };

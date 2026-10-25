@@ -1,4 +1,3 @@
-// costos sacados de la regla 30, todas las mejoras suben 1 punto el stat
 const MEJORAS = [
   { nombre: 'BLINDAJE', atributo: 'casco', costoChatarra: 3 },
   { nombre: 'MOTORES', atributo: 'movimiento', costoChatarra: 2 },

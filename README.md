@@ -147,6 +147,73 @@ consulta, actualización, login, registro y eliminación.
 Las siete peticiones fueron ejecutadas y devolvieron los códigos HTTP
 esperados.
 
+## Tablero, despliegue y acciones — Entrega 3
+
+Modelos del tablero y la flota, con sus migraciones (`004` a `009`), asociaciones y validaciones:
+
+| Tabla | Para qué |
+|---|---|
+| `CatalogoMejoras` | Las 4 mejoras de la regla 30 (se cargan con el seeder `004`) |
+| `Casillas` | Las 100 casillas de cada partida, una por coordenada |
+| `Barcos` | Los 4 barcos de cada jugador, con sus stats y su posición |
+| `CasillasReveladas` | Lo que cada jugador ya descubrió del mapa (relación "descubre" del ER) |
+| `MejorasBarco` | Las mejoras que compró cada barco (relación "adquiere" del ER) |
+| `Acciones` | Cada jugada con su ronda y su resultado (entidad Accion del ER) |
+
+Las reglas fijas del juego (stats de los barcos, zonas de despliegue, casillas especiales y tiempos) están en `src/config/reglas.js`, y las funciones del tablero (generar el mapa, distancias, visión y rutas) en `src/utils/tablero.js`.
+
+| Método | Ruta | Función | Éxito |
+|---|---|---|---|
+| POST | /games/:id/desplegar | Desplegar la flota | 200 |
+| GET | /games/:id | Estado de la partida filtrado por jugador (en despliegue, en curso o terminada) | 200 |
+| POST | /games/:id/acciones | Realizar una acción (por ahora `MOVER`) | 200 |
+| GET | /games/:id/acciones | Listar mis acciones en la partida | 200 |
+| GET / PATCH / DELETE | /games/:id/acciones/:accionId | Consultar, corregir o borrar una acción (corregir y borrar solo en partidas terminadas) | 200 / 204 |
+
+**Lo que hace el servidor:**
+
+- Cuando la partida pasa a `DESPLIEGUE`, genera su tablero (las 12 casillas especiales de la regla 7, sorteadas con `crypto`) y guarda en `expiraEn` el plazo de 2 minutos para desplegar.
+- `desplegar` exige 4 barcos, uno de cada tipo, en casillas distintas y dentro de la zona del `numeroJugador` (filas 1 a 4 o 7 a 10). Cuando los dos están listos, la partida pasa a `EN_CURSO`, se sortea quién parte y el otro recibe 2 de combustible extra. Si se vence el plazo, la siguiente consulta a la partida despliega al azar al que faltaba.
+- El estado solo incluye lo que ve cada jugador: las casillas dentro del radio de detección de sus barcos a flote (distancia Manhattan) y las que ya reveló. Las corrientes que no ha descubierto se ven como agua y, del rival, solo se mandan los barcos dentro de su radio y cuántos le quedan a flote.
+- `MOVER` valida en el orden del protocolo, busca el camino más corto que esquive los barcos visibles y cobra el combustible de las casillas recorridas. En el camino recoge la chatarra de los naufragios, se frena en las corrientes (−1 de casco) o junto a un enemigo que no se veía, y controla el máximo de 2 acciones por barco.
+- Las acciones de una misma partida se procesan de a una (bloqueo de la fila de la partida), así dos peticiones simultáneas no se pisan.
+
+**Ajustes al protocolo de E2:**
+
+- `desplegar` responde `{ partidaId, estado, jugadorActivo }` en vez de cuerpo vacío, ya que en esta entrega no hay WebSocket para avisar el cambio de estado.
+- Nuevo error `409 YA_DESPLEGASTE`, cuando un jugador intenta desplegar dos veces.
+- El estado agrega `yo.numeroJugador`, `yo.listo`, `rival.numeroJugador`, `rival.listo` y `despliegueExpiraEn`. `jugadorActivo` y `jugadorId` son ids de usuario, los `barcoId` son números y `accionesPorBarco` usa el id del barco como clave.
+- Las jugadas que violan las reglas (fuera de turno, sin recursos, fuera de alcance, etc.) responden `422`, como pide la Entrega 4. Los datos mal formados responden `400`, lo que no es tuyo `403` y lo que no existe `404`. Códigos nuevos: `DESTINO_INVALIDO`, `ACCION_NO_DISPONIBLE` y `TIPO_ACCION_INVALIDO`.
+- El resultado de `MOVER` puede incluir `chatarraRecogida` y `hundido`.
+
+**Pendiente:** las acciones `DISPARAR`, `VIGIA` y `MEJORAR`, el combate cuerpo a cuerpo, la chatarra al hundirse y el "contacto perdido". El cambio de turno, el abandono, las cartas de evento (`eventoRonda`) y el resultado final (`resultadoFinal`) están en la sección "Turnos, abandono y eventos de partida".
+
+**Datos de prueba:** el seeder `005-demo-tablero` carga el tablero y los barcos de la partida en curso de `demo_karla` contra `demo_diego` (partida 3, ronda 4, turno de Karla), junto con una mejora, una corriente revelada y algunas acciones de historial. Las cartas de evento de esa partida vienen del seeder `002`.
+
+**Postman:** [docs/postman/tablero.postman_collection.json](docs/postman/tablero.postman_collection.json). Después de `npm run db:reset`, ejecutar las tres carpetas en orden con el Runner. Cada petición trae un ejemplo de respuesta y tests que revisan el código HTTP.
+
+### Cómo simular el ciclo de juego
+
+Con el backend y el frontend corriendo (ver "Ejecutar ambos proyectos") y la base recién recreada con `npm run db:reset`:
+
+**Partida en curso (seeder):**
+
+1. Iniciar sesión en el frontend con `demo_karla` y la contraseña `123456`.
+2. Entrar a `http://localhost:5173/tablero?partidaId=3`.
+3. Hacer click en un barco propio y después en una casilla verde para moverlo. El tablero, los recursos, las acciones y la bitácora se actualizan con lo que responde el servidor, y si la jugada no es válida se muestra el mensaje de error.
+4. En una ventana privada, iniciar sesión con `demo_diego` y abrir la misma partida: se ve su propia versión del mapa y el servidor le rechaza las jugadas porque no es su turno.
+5. Karla aprieta "Terminar turno". La pantalla de Diego se actualiza sola: ahora puede mover y, al terminar su turno, empieza la ronda 5 con una carta de evento nueva.
+6. Con "Abandonar" la partida termina con victoria del rival y se muestra el resultado.
+
+**Partida desde cero:**
+
+1. Iniciar sesión con `demo_libre1` en una ventana y con `demo_libre2` en otra ventana privada.
+2. Los dos eligen "Buscar partida" en el menú, o uno crea la partida y el otro se une con el código.
+3. En Preparación, cada uno ubica sus 4 barcos en su zona y confirma antes de que se acaben los 2 minutos.
+4. Cuando los dos confirman, el servidor sortea quién parte y ambos pasan al tablero.
+
+El mismo ciclo por API es: `PATCH /games/2` (Ana inicia) → `POST /games/2/desplegar` (Ana) → `POST /games/2/desplegar` (Beto) → `GET /games/2` → `POST /games/2/acciones` → `POST /games/2/terminar-turno`. Hasta el despliegue está armado en la carpeta 2 de la colección de tablero, y los turnos en la colección de turnos y eventos.
+
 ## Integración con el frontend
 
 El registro, el inicio de sesión y el menú del frontend utilizan `fetch` para

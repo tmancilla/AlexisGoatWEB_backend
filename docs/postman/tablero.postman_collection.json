@@ -1,0 +1,1671 @@
+{
+  "info": {
+    "name": "Guerra del Pacífico — Tablero, despliegue y acciones",
+    "description": "Endpoints del tablero, el despliegue de la flota, el estado de la partida y la accion de mover (Entrega 3).\n\nAntes de usarla:\n\n1. Recrear la base con los datos de prueba: npm run db:reset (crea los usuarios demo_*, las partidas de prueba y el tablero de la partida demo).\n2. Levantar el servidor con npm run dev.\n3. Ejecutar las carpetas en orden con el Runner de Postman. Los ids de las variables (karla, diego, ana, beto, partidaDemo y partidaPrivada) corresponden a una base recien reseteada; los ids de barcos se guardan solos.\n\nEl usuario se identifica con el header X-Usuario-Id (reemplazo temporal del token JWT de la Entrega 4).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "karla",
+      "value": "6"
+    },
+    {
+      "key": "diego",
+      "value": "7"
+    },
+    {
+      "key": "ana",
+      "value": "4"
+    },
+    {
+      "key": "beto",
+      "value": "5"
+    },
+    {
+      "key": "partidaDemo",
+      "value": "3"
+    },
+    {
+      "key": "partidaPrivada",
+      "value": "2"
+    },
+    {
+      "key": "acorazadoKarla",
+      "value": ""
+    },
+    {
+      "key": "lanchaKarla",
+      "value": ""
+    },
+    {
+      "key": "fragataDiego",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Partida demo en curso (seeder)",
+      "description": "Partida 3 del seeder: Karla contra Diego, ronda 4, turno de Karla. El seeder 005-demo-tablero le carga el tablero, los barcos, una mejora, una corriente revelada y algunas acciones.",
+      "item": [
+        {
+          "name": "Estado de la partida (Karla)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 con el estado de juego', () => pm.response.to.have.status(200));",
+                  "const estado = pm.response.json();",
+                  "pm.test('es el turno de Karla', () => pm.expect(estado.jugadorActivo).to.eql(estado.yo.jugadorId));",
+                  "pm.test('del rival no se mandan los recursos', () => pm.expect(estado.rival).to.not.have.property('recursos'));",
+                  "pm.collectionVariables.set('acorazadoKarla', estado.yo.flota.find((b) => b.tipo === 'ACORAZADO').barcoId);",
+                  "pm.collectionVariables.set('lanchaKarla', estado.yo.flota.find((b) => b.tipo === 'LANCHA').barcoId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{karla}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaDemo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaDemo}}"
+              ]
+            },
+            "description": "Devuelve el estado del protocolo filtrado para Karla: su flota y recursos completos, del rival solo los barcos dentro de su radio de deteccion y del mapa solo las casillas que ve o ya revelo. Guarda los ids del acorazado y la lancha de Karla para las siguientes peticiones."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{karla}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaDemo}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaDemo}}"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"partidaId\": 3,\n  \"estado\": \"EN_CURSO\",\n  \"ronda\": 4,\n  \"rondaMaxima\": 20,\n  \"jugadorActivo\": 6,\n  \"turnoExpiraEn\": null,\n  \"despliegueExpiraEn\": null,\n  \"eventoRonda\": {\n    \"carta\": \"TORMENTA\",\n    \"efecto\": \"Radio de detección -1 para todos los barcos esta ronda.\"\n  },\n  \"yo\": {\n    \"jugadorId\": 6,\n    \"username\": \"demo_karla\",\n    \"numeroJugador\": 1,\n    \"listo\": true,\n    \"conectado\": true,\n    \"recursos\": {\n      \"combustible\": 9,\n      \"municion\": 6,\n      \"chatarra\": 4\n    },\n    \"accionesRestantes\": 2,\n    \"accionesPorBarco\": {\n      \"9\": 1,\n      \"10\": 0,\n      \"11\": 0,\n      \"12\": 0\n    },\n    \"flota\": [\n      {\n        \"barcoId\": 9,\n        \"tipo\": \"LANCHA\",\n        \"casilla\": {\n          \"x\": 5,\n          \"y\": 4\n        },\n        \"casco\": 1,\n        \"cascoMaximo\": 1,\n        \"movimiento\": 3,\n        \"alcance\": 2,\n        \"deteccion\": 3,\n        \"dado\": \"d4\",\n        \"mejoras\": [],\n        \"aFlote\": true\n      },\n      {\n        \"barcoId\": 10,\n        \"tipo\": \"FRAGATA\",\n        \"casilla\": {\n          \"x\": 3,\n          \"y\": 3\n        },\n        \"casco\": 1,\n        \"cascoMaximo\": 2,\n        \"movimiento\": 2,\n        \"alcance\": 3,\n        \"deteccion\": 2,\n        \"dado\": \"d6\",\n        \"mejoras\": [],\n        \"aFlote\": true\n      },\n      {\n        \"barcoId\": 11,\n        \"tipo\": \"DESTRUCTOR\",\n        \"casilla\": {\n          \"x\": 7,\n          \"y\": 3\n        },\n        \"casco\": 4,\n        \"cascoMaximo\": 4,\n        \"movimiento\": 2,\n        \"alcance\": 4,\n        \"deteccion\": 2,\n        \"dado\": \"d8\",\n        \"mejoras\": [\n          \"BLINDAJE\"\n        ],\n        \"aFlote\": true\n      },\n      {\n        \"barcoId\": 12,\n        \"tipo\": \"ACORAZADO\",\n        \"casilla\": {\n          \"x\": 4,\n          \"y\": 2\n        },\n        \"casco\": 4,\n        \"cascoMaximo\": 4,\n        \"movimiento\": 1,\n        \"alcance\": 5,\n        \"deteccion\": 1,\n        \"dado\": \"d10\",\n        \"mejoras\": [],\n        \"aFlote\": true\n      }\n    ]\n  },\n  \"rival\": {\n    \"jugadorId\": 7,\n    \"username\": \"demo_diego\",\n    \"numeroJugador\": 2,\n    \"listo\": true,\n    \"conectado\": true,\n    \"segundosParaAbandono\": null,\n    \"barcosAFlote\": 4\n  },\n  \"casillasVisibles\": [\n    {\n      \"x\": 3,\n      \"y\": 1,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 4,\n      \"y\": 1,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 5,\n      \"y\": 1,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 7,\n      \"y\": 1,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 2,\n      \"y\": 2,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 3,\n      \"y\": 2,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 4,\n      \"y\": 2,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 5,\n      \"y\": 2,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 6,\n      \"y\": 2,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 7,\n      \"y\": 2,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 8,\n      \"y\": 2,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 1,\n      \"y\": 3,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 2,\n      \"y\": 3,\n      \"tipo\": \"CORRIENTE_PELIGROSA\",\n      \"reveladaEnRonda\": 2\n    },\n    {\n      \"x\": 3,\n      \"y\": 3,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 4,\n      \"y\": 3,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 5,\n      \"y\": 3,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 6,\n      \"y\": 3,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 7,\n      \"y\": 3,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 8,\n      \"y\": 3,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 9,\n      \"y\": 3,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 2,\n      \"y\": 4,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 3,\n      \"y\": 4,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 4,\n      \"y\": 4,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 5,\n      \"y\": 4,\n      \"tipo\": \"POZO_PETROLERO\",\n      \"ocupadaPor\": 9\n    },\n    {\n      \"x\": 6,\n      \"y\": 4,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 7,\n      \"y\": 4,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 8,\n      \"y\": 4,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 3,\n      \"y\": 5,\n      \"tipo\": \"POZO_PETROLERO\",\n      \"ocupadaPor\": null\n    },\n    {\n      \"x\": 4,\n      \"y\": 5,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 5,\n      \"y\": 5,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 6,\n      \"y\": 5,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 7,\n      \"y\": 5,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 4,\n      \"y\": 6,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 5,\n      \"y\": 6,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 6,\n      \"y\": 6,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 5,\n      \"y\": 7,\n      \"tipo\": \"AGUA_ABIERTA\"\n    }\n  ],\n  \"contactosEnemigos\": [\n    {\n      \"barcoId\": 13,\n      \"tipo\": \"LANCHA\",\n      \"casilla\": {\n        \"x\": 6,\n        \"y\": 6\n      },\n      \"casco\": 1,\n      \"aFlote\": true,\n      \"visible\": true\n    }\n  ],\n  \"resultadoFinal\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Estado de la partida (Diego)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 con el estado de juego', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('fragataDiego', pm.response.json().yo.flota.find((b) => b.tipo === 'FRAGATA').barcoId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{diego}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaDemo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaDemo}}"
+              ]
+            },
+            "description": "La misma partida vista por Diego. Tiene su propia version del mapa: no ve la corriente que revelo Karla ni sus barcos fuera de su radio. Guarda el id de la fragata de Diego."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{diego}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaDemo}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaDemo}}"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"partidaId\": 3,\n  \"estado\": \"EN_CURSO\",\n  \"ronda\": 4,\n  \"rondaMaxima\": 20,\n  \"jugadorActivo\": 6,\n  \"turnoExpiraEn\": null,\n  \"despliegueExpiraEn\": null,\n  \"eventoRonda\": {\n    \"carta\": \"TORMENTA\",\n    \"efecto\": \"Radio de detección -1 para todos los barcos esta ronda.\"\n  },\n  \"yo\": {\n    \"jugadorId\": 7,\n    \"username\": \"demo_diego\",\n    \"numeroJugador\": 2,\n    \"listo\": true,\n    \"conectado\": true,\n    \"recursos\": {\n      \"combustible\": 7,\n      \"municion\": 5,\n      \"chatarra\": 3\n    },\n    \"accionesRestantes\": 3,\n    \"accionesPorBarco\": {\n      \"13\": 0,\n      \"14\": 0,\n      \"15\": 0,\n      \"16\": 0\n    },\n    \"flota\": [\n      {\n        \"barcoId\": 13,\n        \"tipo\": \"LANCHA\",\n        \"casilla\": {\n          \"x\": 6,\n          \"y\": 6\n        },\n        \"casco\": 1,\n        \"cascoMaximo\": 1,\n        \"movimiento\": 3,\n        \"alcance\": 2,\n        \"deteccion\": 3,\n        \"dado\": \"d4\",\n        \"mejoras\": [],\n        \"aFlote\": true\n      },\n      {\n        \"barcoId\": 14,\n        \"tipo\": \"FRAGATA\",\n        \"casilla\": {\n          \"x\": 7,\n          \"y\": 8\n        },\n        \"casco\": 2,\n        \"cascoMaximo\": 2,\n        \"movimiento\": 2,\n        \"alcance\": 3,\n        \"deteccion\": 2,\n        \"dado\": \"d6\",\n        \"mejoras\": [],\n        \"aFlote\": true\n      },\n      {\n        \"barcoId\": 15,\n        \"tipo\": \"DESTRUCTOR\",\n        \"casilla\": {\n          \"x\": 3,\n          \"y\": 8\n        },\n        \"casco\": 2,\n        \"cascoMaximo\": 3,\n        \"movimiento\": 2,\n        \"alcance\": 4,\n        \"deteccion\": 2,\n        \"dado\": \"d8\",\n        \"mejoras\": [],\n        \"aFlote\": true\n      },\n      {\n        \"barcoId\": 16,\n        \"tipo\": \"ACORAZADO\",\n        \"casilla\": {\n          \"x\": 5,\n          \"y\": 9\n        },\n        \"casco\": 4,\n        \"cascoMaximo\": 4,\n        \"movimiento\": 1,\n        \"alcance\": 5,\n        \"deteccion\": 1,\n        \"dado\": \"d10\",\n        \"mejoras\": [],\n        \"aFlote\": true\n      }\n    ]\n  },\n  \"rival\": {\n    \"jugadorId\": 6,\n    \"username\": \"demo_karla\",\n    \"numeroJugador\": 1,\n    \"listo\": true,\n    \"conectado\": true,\n    \"segundosParaAbandono\": null,\n    \"barcosAFlote\": 4\n  },\n  \"casillasVisibles\": [\n    {\n      \"x\": 6,\n      \"y\": 3,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 5,\n      \"y\": 4,\n      \"tipo\": \"POZO_PETROLERO\",\n      \"ocupadaPor\": 9\n    },\n    {\n      \"x\": 6,\n      \"y\": 4,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 7,\n      \"y\": 4,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 4,\n      \"y\": 5,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 5,\n      \"y\": 5,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 6,\n      \"y\": 5,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 7,\n      \"y\": 5,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 8,\n      \"y\": 5,\n      \"tipo\": \"DEPOSITO_MUNICION\",\n      \"ocupadaPor\": null\n    },\n    {\n      \"x\": 3,\n      \"y\": 6,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 4,\n      \"y\": 6,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 5,\n      \"y\": 6,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 6,\n      \"y\": 6,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 7,\n      \"y\": 6,\n      \"tipo\": \"POZO_PETROLERO\",\n      \"ocupadaPor\": null\n    },\n    {\n      \"x\": 8,\n      \"y\": 6,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 9,\n      \"y\": 6,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 2,\n      \"y\": 7,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 3,\n      \"y\": 7,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 4,\n      \"y\": 7,\n      \"tipo\": \"NAUFRAGIO\"\n    },\n    {\n      \"x\": 5,\n      \"y\": 7,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 6,\n      \"y\": 7,\n      \"tipo\": \"DEPOSITO_MUNICION\",\n      \"ocupadaPor\": null\n    },\n    {\n      \"x\": 7,\n      \"y\": 7,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 8,\n      \"y\": 7,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 1,\n      \"y\": 8,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 2,\n      \"y\": 8,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 3,\n      \"y\": 8,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 4,\n      \"y\": 8,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 5,\n      \"y\": 8,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 6,\n      \"y\": 8,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 7,\n      \"y\": 8,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 8,\n      \"y\": 8,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 9,\n      \"y\": 8,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 2,\n      \"y\": 9,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 3,\n      \"y\": 9,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 4,\n      \"y\": 9,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 5,\n      \"y\": 9,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 6,\n      \"y\": 9,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 7,\n      \"y\": 9,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 8,\n      \"y\": 9,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 3,\n      \"y\": 10,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 5,\n      \"y\": 10,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 7,\n      \"y\": 10,\n      \"tipo\": \"AGUA_ABIERTA\"\n    }\n  ],\n  \"contactosEnemigos\": [\n    {\n      \"barcoId\": 9,\n      \"tipo\": \"LANCHA\",\n      \"casilla\": {\n        \"x\": 5,\n        \"y\": 4\n      },\n      \"casco\": 1,\n      \"aFlote\": true,\n      \"visible\": true\n    }\n  ],\n  \"resultadoFinal\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Mover el acorazado de Karla",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 con el resultado del movimiento', () => pm.response.to.have.status(200));",
+                  "pm.test('llego al destino', () => pm.expect(pm.response.json().resultado.detenidoPor).to.eql('DESTINO_ALCANZADO'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{karla}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaDemo}}/acciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaDemo}}",
+                "acciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipoAccion\": \"MOVER\",\n  \"barcoId\": {{acorazadoKarla}},\n  \"casillaDestino\": { \"x\": 4, \"y\": 3 }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Accion MOVER: el acorazado (movimiento 1, 2 de combustible por casilla) baja de (4,2) a (4,3). Descuenta la accion y el combustible y queda guardada en la tabla Acciones."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{karla}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaDemo}}/acciones",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaDemo}}",
+                    "acciones"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipoAccion\": \"MOVER\",\n  \"barcoId\": {{acorazadoKarla}},\n  \"casillaDestino\": { \"x\": 4, \"y\": 3 }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"tipoAccion\": \"MOVER\",\n  \"barcoId\": 12,\n  \"resultado\": {\n    \"casillaFinal\": {\n      \"x\": 4,\n      \"y\": 3\n    },\n    \"casillasRecorridas\": 1,\n    \"detenidoPor\": \"DESTINO_ALCANZADO\"\n  },\n  \"costos\": {\n    \"combustible\": 2,\n    \"acciones\": 1\n  },\n  \"accionesRestantes\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Historial de acciones de Karla",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 con la lista de acciones', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{karla}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaDemo}}/acciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaDemo}}",
+                "acciones"
+              ]
+            },
+            "description": "Lista las acciones de Karla en la partida (CRUD de acciones de Vicente), incluidas las del seeder y el movimiento recien hecho."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{karla}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaDemo}}/acciones",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaDemo}}",
+                    "acciones"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"id\": 1,\n    \"jugadorPartidaId\": 4,\n    \"barcoId\": 10,\n    \"tipo\": \"MOVER\",\n    \"ronda\": 2,\n    \"resultado\": {\n      \"dano\": 1,\n      \"costos\": {\n        \"acciones\": 1,\n        \"combustible\": 1\n      },\n      \"detenidoPor\": \"CORRIENTE_PELIGROSA\",\n      \"casillaFinal\": {\n        \"x\": 2,\n        \"y\": 3\n      },\n      \"casillaDestino\": {\n        \"x\": 1,\n        \"y\": 3\n      },\n      \"casillasRecorridas\": 1\n    },\n    \"createdAt\": \"2026-10-25T20:26:54.800Z\",\n    \"updatedAt\": \"2026-10-25T20:26:54.800Z\"\n  },\n  {\n    \"id\": 2,\n    \"jugadorPartidaId\": 4,\n    \"barcoId\": 11,\n    \"tipo\": \"MEJORAR\",\n    \"ronda\": 3,\n    \"resultado\": {\n      \"costos\": {\n        \"acciones\": 1,\n        \"chatarra\": 3\n      },\n      \"mejora\": \"BLINDAJE\",\n      \"valorNuevo\": 4,\n      \"statMejorado\": \"casco\"\n    },\n    \"createdAt\": \"2026-10-25T20:26:54.800Z\",\n    \"updatedAt\": \"2026-10-25T20:26:54.800Z\"\n  },\n  {\n    \"id\": 4,\n    \"jugadorPartidaId\": 4,\n    \"barcoId\": 9,\n    \"tipo\": \"MOVER\",\n    \"ronda\": 4,\n    \"resultado\": {\n      \"costos\": {\n        \"acciones\": 1,\n        \"combustible\": 1\n      },\n      \"detenidoPor\": \"DESTINO_ALCANZADO\",\n      \"casillaFinal\": {\n        \"x\": 5,\n        \"y\": 4\n      },\n      \"casillaDestino\": {\n        \"x\": 5,\n        \"y\": 4\n      },\n      \"casillasRecorridas\": 1\n    },\n    \"createdAt\": \"2026-10-25T20:26:54.800Z\",\n    \"updatedAt\": \"2026-10-25T20:26:54.800Z\"\n  },\n  {\n    \"id\": 5,\n    \"jugadorPartidaId\": 4,\n    \"barcoId\": 12,\n    \"tipo\": \"MOVER\",\n    \"ronda\": 4,\n    \"resultado\": {\n      \"costos\": {\n        \"acciones\": 1,\n        \"combustible\": 2\n      },\n      \"detenidoPor\": \"DESTINO_ALCANZADO\",\n      \"casillaFinal\": {\n        \"x\": 4,\n        \"y\": 3\n      },\n      \"casillaDestino\": {\n        \"x\": 4,\n        \"y\": 3\n      },\n      \"casillasRecorridas\": 1\n    },\n    \"createdAt\": \"2026-10-25T20:27:28.260Z\",\n    \"updatedAt\": \"2026-10-25T20:27:28.260Z\"\n  }\n]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Despliegue desde cero (partida privada de Ana y Beto)",
+      "description": "La partida 2 del seeder esta lista para iniciar. Al pasar a DESPLIEGUE el servidor genera el tablero y da 2 minutos para desplegar: estas peticiones deben correrse de seguido.",
+      "item": [
+        {
+          "name": "Ana inicia la partida",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 y la partida queda en despliegue', () => pm.expect(pm.response.json().estado).to.eql('DESPLIEGUE'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{ana}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaPrivada}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaPrivada}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"DESPLIEGUE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Endpoint de Tomas. Al pasar a DESPLIEGUE se generan las 100 casillas de la partida y se guarda en expiraEn el plazo de 2 minutos para desplegar."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{ana}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaPrivada}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaPrivada}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"estado\": \"DESPLIEGUE\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"partidaId\": 2,\n  \"estado\": \"DESPLIEGUE\",\n  \"modo\": \"PRIVADA\",\n  \"rondaActual\": 0,\n  \"maxRondas\": 20,\n  \"expiraEn\": \"2026-10-25T20:29:28.367Z\",\n  \"jugadores\": [\n    {\n      \"id\": 4,\n      \"username\": \"demo_ana\",\n      \"rolPartida\": \"DUENO\",\n      \"numeroJugador\": 1\n    },\n    {\n      \"id\": 5,\n      \"username\": \"demo_beto\",\n      \"rolPartida\": \"INVITADO\",\n      \"numeroJugador\": 2\n    }\n  ],\n  \"createdAt\": \"2026-10-25T20:21:54.695Z\",\n  \"codigoInvitacion\": \"GRAU23\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Estado en despliegue (Ana)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 en despliegue', () => pm.expect(pm.response.json().estado).to.eql('DESPLIEGUE'));",
+                  "pm.test('no ve casillas ni enemigos', () => pm.expect(pm.response.json().casillasVisibles).to.have.length(0));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{ana}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaPrivada}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaPrivada}}"
+              ]
+            },
+            "description": "Durante el despliegue cada jugador ve su numeroJugador (para saber su zona), si el rival ya esta listo y el plazo en despliegueExpiraEn. No se ve nada del mapa ni del rival."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{ana}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaPrivada}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaPrivada}}"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"partidaId\": 2,\n  \"estado\": \"DESPLIEGUE\",\n  \"ronda\": 0,\n  \"rondaMaxima\": 20,\n  \"jugadorActivo\": null,\n  \"turnoExpiraEn\": null,\n  \"despliegueExpiraEn\": \"2026-10-25T20:29:28.367Z\",\n  \"eventoRonda\": null,\n  \"yo\": {\n    \"jugadorId\": 4,\n    \"username\": \"demo_ana\",\n    \"numeroJugador\": 1,\n    \"listo\": false,\n    \"conectado\": true,\n    \"recursos\": {\n      \"combustible\": 12,\n      \"municion\": 8,\n      \"chatarra\": 0\n    },\n    \"accionesRestantes\": 3,\n    \"accionesPorBarco\": {},\n    \"flota\": []\n  },\n  \"rival\": {\n    \"jugadorId\": 5,\n    \"username\": \"demo_beto\",\n    \"numeroJugador\": 2,\n    \"listo\": false,\n    \"conectado\": true,\n    \"segundosParaAbandono\": null,\n    \"barcosAFlote\": 0\n  },\n  \"casillasVisibles\": [],\n  \"contactosEnemigos\": [],\n  \"resultadoFinal\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Error: Ana despliega fuera de su zona",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400 DESPLIEGUE_INVALIDO', () => { pm.response.to.have.status(400); pm.expect(pm.response.json().codigo).to.eql('DESPLIEGUE_INVALIDO'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{ana}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaPrivada}}/desplegar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaPrivada}}",
+                "desplegar"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"barcos\": [\n    { \"tipo\": \"LANCHA\", \"casilla\": { \"x\": 2, \"y\": 1 } },\n    { \"tipo\": \"FRAGATA\", \"casilla\": { \"x\": 3, \"y\": 2 } },\n    { \"tipo\": \"DESTRUCTOR\", \"casilla\": { \"x\": 1, \"y\": 3 } },\n    { \"tipo\": \"ACORAZADO\", \"casilla\": { \"x\": 4, \"y\": 6 } }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Ana es el jugador 1 y solo puede desplegar en las filas 1 a 4. El acorazado en la fila 6 hace fallar todo el despliegue sin crear barcos."
+          },
+          "response": [
+            {
+              "name": "400 Bad Request",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{ana}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaPrivada}}/desplegar",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaPrivada}}",
+                    "desplegar"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"barcos\": [\n    { \"tipo\": \"LANCHA\", \"casilla\": { \"x\": 2, \"y\": 1 } },\n    { \"tipo\": \"FRAGATA\", \"casilla\": { \"x\": 3, \"y\": 2 } },\n    { \"tipo\": \"DESTRUCTOR\", \"casilla\": { \"x\": 1, \"y\": 3 } },\n    { \"tipo\": \"ACORAZADO\", \"casilla\": { \"x\": 4, \"y\": 6 } }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"codigo\": \"DESPLIEGUE_INVALIDO\",\n  \"mensaje\": \"ACORAZADO debe ir en tu zona, entre las filas 1 y 4.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Ana despliega su flota",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 esperando al rival', () => pm.expect(pm.response.json().estado).to.eql('DESPLIEGUE'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{ana}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaPrivada}}/desplegar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaPrivada}}",
+                "desplegar"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"barcos\": [\n    { \"tipo\": \"LANCHA\", \"casilla\": { \"x\": 2, \"y\": 1 } },\n    { \"tipo\": \"FRAGATA\", \"casilla\": { \"x\": 3, \"y\": 2 } },\n    { \"tipo\": \"DESTRUCTOR\", \"casilla\": { \"x\": 1, \"y\": 3 } },\n    { \"tipo\": \"ACORAZADO\", \"casilla\": { \"x\": 4, \"y\": 1 } }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Cuatro barcos, uno de cada tipo, en casillas distintas de las filas 1 a 4. Ana queda lista y la partida sigue en DESPLIEGUE esperando a Beto."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{ana}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaPrivada}}/desplegar",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaPrivada}}",
+                    "desplegar"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"barcos\": [\n    { \"tipo\": \"LANCHA\", \"casilla\": { \"x\": 2, \"y\": 1 } },\n    { \"tipo\": \"FRAGATA\", \"casilla\": { \"x\": 3, \"y\": 2 } },\n    { \"tipo\": \"DESTRUCTOR\", \"casilla\": { \"x\": 1, \"y\": 3 } },\n    { \"tipo\": \"ACORAZADO\", \"casilla\": { \"x\": 4, \"y\": 1 } }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"partidaId\": 2,\n  \"estado\": \"DESPLIEGUE\",\n  \"jugadorActivo\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Error: Ana despliega dos veces",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('409 YA_DESPLEGASTE', () => pm.expect(pm.response.json().codigo).to.eql('YA_DESPLEGASTE'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{ana}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaPrivada}}/desplegar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaPrivada}}",
+                "desplegar"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"barcos\": [\n    { \"tipo\": \"LANCHA\", \"casilla\": { \"x\": 2, \"y\": 1 } },\n    { \"tipo\": \"FRAGATA\", \"casilla\": { \"x\": 3, \"y\": 2 } },\n    { \"tipo\": \"DESTRUCTOR\", \"casilla\": { \"x\": 1, \"y\": 3 } },\n    { \"tipo\": \"ACORAZADO\", \"casilla\": { \"x\": 4, \"y\": 1 } }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Un jugador solo puede desplegar una vez por partida."
+          },
+          "response": [
+            {
+              "name": "409 Conflict",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{ana}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaPrivada}}/desplegar",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaPrivada}}",
+                    "desplegar"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"barcos\": [\n    { \"tipo\": \"LANCHA\", \"casilla\": { \"x\": 2, \"y\": 1 } },\n    { \"tipo\": \"FRAGATA\", \"casilla\": { \"x\": 3, \"y\": 2 } },\n    { \"tipo\": \"DESTRUCTOR\", \"casilla\": { \"x\": 1, \"y\": 3 } },\n    { \"tipo\": \"ACORAZADO\", \"casilla\": { \"x\": 4, \"y\": 1 } }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"codigo\": \"YA_DESPLEGASTE\",\n  \"mensaje\": \"Ya desplegaste tu flota en esta partida.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Beto despliega y parte la partida",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 y la partida empieza', () => pm.expect(pm.response.json().estado).to.eql('EN_CURSO'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{beto}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaPrivada}}/desplegar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaPrivada}}",
+                "desplegar"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"barcos\": [\n    { \"tipo\": \"LANCHA\", \"casilla\": { \"x\": 9, \"y\": 10 } },\n    { \"tipo\": \"FRAGATA\", \"casilla\": { \"x\": 8, \"y\": 9 } },\n    { \"tipo\": \"DESTRUCTOR\", \"casilla\": { \"x\": 10, \"y\": 8 } },\n    { \"tipo\": \"ACORAZADO\", \"casilla\": { \"x\": 7, \"y\": 10 } }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Beto es el jugador 2 (filas 7 a 10). Al estar los dos listos la partida pasa a EN_CURSO en la ronda 1, se sortea quien parte (jugadorActivo es su id de usuario) y el otro recibe 2 de combustible extra."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{beto}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaPrivada}}/desplegar",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaPrivada}}",
+                    "desplegar"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"barcos\": [\n    { \"tipo\": \"LANCHA\", \"casilla\": { \"x\": 9, \"y\": 10 } },\n    { \"tipo\": \"FRAGATA\", \"casilla\": { \"x\": 8, \"y\": 9 } },\n    { \"tipo\": \"DESTRUCTOR\", \"casilla\": { \"x\": 10, \"y\": 8 } },\n    { \"tipo\": \"ACORAZADO\", \"casilla\": { \"x\": 7, \"y\": 10 } }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"partidaId\": 2,\n  \"estado\": \"EN_CURSO\",\n  \"jugadorActivo\": 5\n}"
+            }
+          ]
+        },
+        {
+          "name": "Estado en curso (Beto)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 en curso', () => pm.expect(pm.response.json().estado).to.eql('EN_CURSO'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{beto}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaPrivada}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaPrivada}}"
+              ]
+            },
+            "description": "Con la partida en curso ya se ven las casillas dentro del radio de deteccion de los barcos propios."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{beto}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaPrivada}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaPrivada}}"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"partidaId\": 2,\n  \"estado\": \"EN_CURSO\",\n  \"ronda\": 1,\n  \"rondaMaxima\": 20,\n  \"jugadorActivo\": 5,\n  \"turnoExpiraEn\": \"2026-10-25T20:30:28.624Z\",\n  \"despliegueExpiraEn\": null,\n  \"eventoRonda\": {\n    \"carta\": \"BOTIN_FLOTANTE\",\n    \"efecto\": \"Aparece un bono de 2 de combustible o munición en una casilla vacía al azar.\"\n  },\n  \"yo\": {\n    \"jugadorId\": 5,\n    \"username\": \"demo_beto\",\n    \"numeroJugador\": 2,\n    \"listo\": true,\n    \"conectado\": true,\n    \"recursos\": {\n      \"combustible\": 12,\n      \"municion\": 8,\n      \"chatarra\": 0\n    },\n    \"accionesRestantes\": 3,\n    \"accionesPorBarco\": {\n      \"21\": 0,\n      \"22\": 0,\n      \"23\": 0,\n      \"24\": 0\n    },\n    \"flota\": [\n      {\n        \"barcoId\": 21,\n        \"tipo\": \"LANCHA\",\n        \"casilla\": {\n          \"x\": 9,\n          \"y\": 10\n        },\n        \"casco\": 1,\n        \"cascoMaximo\": 1,\n        \"movimiento\": 3,\n        \"alcance\": 2,\n        \"deteccion\": 3,\n        \"dado\": \"d4\",\n        \"mejoras\": [],\n        \"aFlote\": true\n      },\n      {\n        \"barcoId\": 22,\n        \"tipo\": \"FRAGATA\",\n        \"casilla\": {\n          \"x\": 8,\n          \"y\": 9\n        },\n        \"casco\": 2,\n        \"cascoMaximo\": 2,\n        \"movimiento\": 2,\n        \"alcance\": 3,\n        \"deteccion\": 2,\n        \"dado\": \"d6\",\n        \"mejoras\": [],\n        \"aFlote\": true\n      },\n      {\n        \"barcoId\": 23,\n        \"tipo\": \"DESTRUCTOR\",\n        \"casilla\": {\n          \"x\": 10,\n          \"y\": 8\n        },\n        \"casco\": 3,\n        \"cascoMaximo\": 3,\n        \"movimiento\": 2,\n        \"alcance\": 4,\n        \"deteccion\": 2,\n        \"dado\": \"d8\",\n        \"mejoras\": [],\n        \"aFlote\": true\n      },\n      {\n        \"barcoId\": 24,\n        \"tipo\": \"ACORAZADO\",\n        \"casilla\": {\n          \"x\": 7,\n          \"y\": 10\n        },\n        \"casco\": 4,\n        \"cascoMaximo\": 4,\n        \"movimiento\": 1,\n        \"alcance\": 5,\n        \"deteccion\": 1,\n        \"dado\": \"d10\",\n        \"mejoras\": [],\n        \"aFlote\": true\n      }\n    ]\n  },\n  \"rival\": {\n    \"jugadorId\": 4,\n    \"username\": \"demo_ana\",\n    \"numeroJugador\": 1,\n    \"listo\": true,\n    \"conectado\": true,\n    \"segundosParaAbandono\": null,\n    \"barcosAFlote\": 4\n  },\n  \"casillasVisibles\": [\n    {\n      \"x\": 10,\n      \"y\": 6,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 8,\n      \"y\": 7,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 9,\n      \"y\": 7,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 10,\n      \"y\": 7,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 7,\n      \"y\": 8,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 8,\n      \"y\": 8,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 9,\n      \"y\": 8,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 10,\n      \"y\": 8,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 6,\n      \"y\": 9,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 7,\n      \"y\": 9,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 8,\n      \"y\": 9,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 9,\n      \"y\": 9,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 10,\n      \"y\": 9,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 6,\n      \"y\": 10,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 7,\n      \"y\": 10,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 8,\n      \"y\": 10,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 9,\n      \"y\": 10,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 10,\n      \"y\": 10,\n      \"tipo\": \"AGUA_ABIERTA\"\n    }\n  ],\n  \"contactosEnemigos\": [],\n  \"resultadoFinal\": null\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Errores de las acciones",
+      "description": "Sobre la partida demo, donde es el turno de Karla. Ninguno de estos errores gasta acciones ni combustible.",
+      "item": [
+        {
+          "name": "Diego mueve fuera de su turno",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422 NO_ES_TU_TURNO', () => pm.expect(pm.response.json().codigo).to.eql('NO_ES_TU_TURNO'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{diego}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaDemo}}/acciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaDemo}}",
+                "acciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipoAccion\": \"MOVER\",\n  \"barcoId\": {{fragataDiego}},\n  \"casillaDestino\": { \"x\": 7, \"y\": 7 }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Las jugadas que violan las reglas responden 422."
+          },
+          "response": [
+            {
+              "name": "422 Unprocessable Entity",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{diego}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaDemo}}/acciones",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaDemo}}",
+                    "acciones"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipoAccion\": \"MOVER\",\n  \"barcoId\": {{fragataDiego}},\n  \"casillaDestino\": { \"x\": 7, \"y\": 7 }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"codigo\": \"NO_ES_TU_TURNO\",\n  \"mensaje\": \"No es tu turno, espera a que el rival termine.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Mover mas lejos que el movimiento del barco",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422 FUERA_DE_MOVIMIENTO', () => pm.expect(pm.response.json().codigo).to.eql('FUERA_DE_MOVIMIENTO'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{karla}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaDemo}}/acciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaDemo}}",
+                "acciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipoAccion\": \"MOVER\",\n  \"barcoId\": {{acorazadoKarla}},\n  \"casillaDestino\": { \"x\": 4, \"y\": 8 }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "El acorazado mueve 1 casilla por accion."
+          },
+          "response": [
+            {
+              "name": "422 Unprocessable Entity",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{karla}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaDemo}}/acciones",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaDemo}}",
+                    "acciones"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipoAccion\": \"MOVER\",\n  \"barcoId\": {{acorazadoKarla}},\n  \"casillaDestino\": { \"x\": 4, \"y\": 8 }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"codigo\": \"FUERA_DE_MOVIMIENTO\",\n  \"mensaje\": \"El destino esta a 5 casillas y este barco mueve 1.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Mover a una casilla con un barco visible",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422 CASILLA_OCUPADA', () => pm.expect(pm.response.json().codigo).to.eql('CASILLA_OCUPADA'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{karla}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaDemo}}/acciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaDemo}}",
+                "acciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipoAccion\": \"MOVER\",\n  \"barcoId\": {{lanchaKarla}},\n  \"casillaDestino\": { \"x\": 6, \"y\": 6 }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "La lancha enemiga de Diego esta en (6,6) dentro del radio de Karla."
+          },
+          "response": [
+            {
+              "name": "422 Unprocessable Entity",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{karla}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaDemo}}/acciones",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaDemo}}",
+                    "acciones"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipoAccion\": \"MOVER\",\n  \"barcoId\": {{lanchaKarla}},\n  \"casillaDestino\": { \"x\": 6, \"y\": 6 }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"codigo\": \"CASILLA_OCUPADA\",\n  \"mensaje\": \"Ya hay un barco en la casilla de destino.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Mover un barco del rival",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403 BARCO_NO_ES_TUYO', () => pm.expect(pm.response.json().codigo).to.eql('BARCO_NO_ES_TUYO'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{karla}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaDemo}}/acciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaDemo}}",
+                "acciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipoAccion\": \"MOVER\",\n  \"barcoId\": {{fragataDiego}},\n  \"casillaDestino\": { \"x\": 7, \"y\": 7 }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Solo se pueden mover barcos propios."
+          },
+          "response": [
+            {
+              "name": "403 Forbidden",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{karla}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaDemo}}/acciones",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaDemo}}",
+                    "acciones"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipoAccion\": \"MOVER\",\n  \"barcoId\": {{fragataDiego}},\n  \"casillaDestino\": { \"x\": 7, \"y\": 7 }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"codigo\": \"BARCO_NO_ES_TUYO\",\n  \"mensaje\": \"Ese barco no es tuyo.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Accion que todavia no esta disponible",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422 ACCION_NO_DISPONIBLE', () => pm.expect(pm.response.json().codigo).to.eql('ACCION_NO_DISPONIBLE'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{karla}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaDemo}}/acciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaDemo}}",
+                "acciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipoAccion\": \"DISPARAR\",\n  \"barcoId\": {{acorazadoKarla}},\n  \"casillaObjetivo\": { \"x\": 6, \"y\": 6 }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Por ahora solo esta implementada la accion MOVER."
+          },
+          "response": [
+            {
+              "name": "422 Unprocessable Entity",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{karla}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaDemo}}/acciones",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaDemo}}",
+                    "acciones"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipoAccion\": \"DISPARAR\",\n  \"barcoId\": {{acorazadoKarla}},\n  \"casillaObjetivo\": { \"x\": 6, \"y\": 6 }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"codigo\": \"ACCION_NO_DISPONIBLE\",\n  \"mensaje\": \"Por ahora solo se puede usar: MOVER.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Partida que no existe",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404 PARTIDA_NO_EXISTE', () => pm.expect(pm.response.json().codigo).to.eql('PARTIDA_NO_EXISTE'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{karla}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "999999"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "404 Not Found",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{karla}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/999999",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "999999"
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"codigo\": \"PARTIDA_NO_EXISTE\",\n  \"mensaje\": \"No existe una partida con ese ID.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Sin el header X-Usuario-Id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('401 USUARIO_NO_IDENTIFICADO', () => pm.expect(pm.response.json().codigo).to.eql('USUARIO_NO_IDENTIFICADO'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaDemo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaDemo}}"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "401 Unauthorized",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaDemo}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaDemo}}"
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"codigo\": \"USUARIO_NO_IDENTIFICADO\",\n  \"mensaje\": \"Debes enviar el header X-Usuario-Id con el id del usuario.\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

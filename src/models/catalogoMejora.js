@@ -1,4 +1,3 @@
-// catalogo de las 4 mejoras de la regla 30, cada barco las compra con chatarra
 module.exports = (sequelize, DataTypes) => {
   const CatalogoMejora = sequelize.define(
     'CatalogoMejora',
@@ -12,7 +11,6 @@ module.exports = (sequelize, DataTypes) => {
             args: [['BLINDAJE', 'MOTORES', 'ARTILLERIA', 'RADAR']],
             msg: 'La mejora debe ser BLINDAJE, MOTORES, ARTILLERIA o RADAR.'}}},
 
-      // stat del barco que sube cuando se compra la mejora
       atributo: {
         type: DataTypes.STRING,
         allowNull: false,

@@ -192,8 +192,6 @@ Las reglas fijas del juego (stats de los barcos, zonas de despliegue, casillas e
 
 **Postman:** [docs/postman/tablero.postman_collection.json](docs/postman/tablero.postman_collection.json). Después de `npm run db:reset`, ejecutar las tres carpetas en orden con el Runner. Cada petición trae un ejemplo de respuesta y tests que revisan el código HTTP.
 
-**Uso de IA:** declarado en [docs/uso-ia-tablero.md](docs/uso-ia-tablero.md).
-
 ### Cómo simular el ciclo de juego
 
 Con el backend y el frontend corriendo (ver "Ejecutar ambos proyectos") y la base recién recreada con `npm run db:reset`:

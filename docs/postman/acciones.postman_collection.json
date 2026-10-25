@@ -1,0 +1,146 @@
+{
+  "info": {
+    "_postman_id": "9fa87bbb-8f11-4b3e-b3c4-87cd497206d9",
+    "name": "Guerra del Pacifico - Acciones",
+    "description": "Consulta y mantenimiento del historial propio de acciones. Configurar usuarioId, partidaId y accionId con registros existentes. Para actualizar o eliminar, la partida debe estar TERMINADA. Estos cambios afectan al historial y no revierten movimientos ni recursos.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "53043357",
+    "_collection_link": "https://go.postman.co/collection/53043357-9fa87bbb-8f11-4b3e-b3c4-87cd497206d9?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "1. Listar acciones propias - 200",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Usuario-Id",
+            "value": "{{usuarioId}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/games/{{partidaId}}/acciones",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "games",
+            "{{partidaId}}",
+            "acciones"
+          ]
+        },
+        "description": "Lista las acciones del usuario identificado dentro de la partida."
+      },
+      "response": []
+    },
+    {
+      "name": "2. Consultar accion propia - 200",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Usuario-Id",
+            "value": "{{usuarioId}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/games/{{partidaId}}/acciones/{{accionId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "games",
+            "{{partidaId}}",
+            "acciones",
+            "{{accionId}}"
+          ]
+        },
+        "description": "Consulta una accion existente del usuario identificado dentro de la partida."
+      },
+      "response": []
+    },
+    {
+      "name": "3. Actualizar accion propia - 200",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "X-Usuario-Id",
+            "value": "{{usuarioId}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"ronda\": 2\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/games/{{partidaId}}/acciones/{{accionId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "games",
+            "{{partidaId}}",
+            "acciones",
+            "{{accionId}}"
+          ]
+        },
+        "description": "Actualiza la ronda del registro. La partida debe estar TERMINADA. Tambien se permite actualizar tipo y resultado. Si la partida no esta terminada, devuelve 409 ACCION_NO_EDITABLE."
+      },
+      "response": []
+    },
+    {
+      "name": "4. Eliminar accion propia - 204",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "X-Usuario-Id",
+            "value": "{{usuarioId}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/games/{{partidaId}}/acciones/{{accionId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "games",
+            "{{partidaId}}",
+            "acciones",
+            "{{accionId}}"
+          ]
+        },
+        "description": "Elimina el registro propio del historial. La partida debe estar TERMINADA. Devuelve 204 sin cuerpo. Si la partida no esta terminada, devuelve 409 ACCION_NO_EDITABLE."
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "usuarioId",
+      "value": ""
+    },
+    {
+      "key": "partidaId",
+      "value": ""
+    },
+    {
+      "key": "accionId",
+      "value": ""
+    }
+  ]
+}

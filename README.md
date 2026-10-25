@@ -128,6 +128,7 @@ Modelos `Partida` y `JugadorPartida` (relación muchos a muchos entre `Usuario` 
 **Ajustes al protocolo de E2:** `partidaId` es un entero; la respuesta `202` de matchmaking incluye `partidaId`; se agregaron `GET /games`, `PATCH` y `DELETE` para completar el CRUD.
 
 **Datos de prueba:** `npm run db:seed` crea usuarios `demo_*` (contraseña `123456`) y partidas en distintos estados. El lobby `PRAT22` permite probar unirse por código con `demo_libre1`.
+Las partidas en curso y terminada incluyen un tablero fijo (100 casillas, con las 12 especiales de la regla 7) y la flota de cada jugador, así que se pueden consultar con `GET /games/:id` y, en la partida en curso, `demo_karla` puede jugar su turno.
 
 **Flujo de prueba:** `POST /games` → `POST /games/<codigo>/join` → `GET /games/<id>` → `PATCH /games/<id>` → `DELETE /games/<id>`.
 
@@ -215,9 +216,10 @@ El mismo ciclo por API es: `PATCH /games/2` (Ana inicia) → `POST /games/2/desp
 
 ## Integración con el frontend
 
-El registro y el inicio de sesión del frontend utilizan `fetch` para
-comunicarse con `/auth/register` y `/auth/login`. Las cuentas se guardan
-en PostgreSQL y permanecen disponibles después de recargar la página.
+El registro, el inicio de sesión y el menú del frontend utilizan `fetch` para
+comunicarse con el backend: `/auth/register`, `/auth/login` y los endpoints de
+`/games` (crear partida, unirse por código, buscar rival y cancelar). Las cuentas
+y partidas se guardan en PostgreSQL y permanecen disponibles después de recargar la página.
 
 ### Configuración del frontend
 
@@ -299,3 +301,25 @@ la autenticación del servidor mediante JWT queda para la Entrega 4.
 Las cuentas permanecen guardadas en PostgreSQL aunque se cierre sesión.
 Para identificar al usuario en las peticiones a `/games`, se utiliza
 el header `X-Usuario-Id` explicado anteriormente.
+
+## Turnos, abandono y eventos de partida
+
+| Método | Ruta | Función | Éxito |
+|---|---|---|---|
+| POST | /games/:id/terminar-turno | Termina el turno del jugador activo | 200 |
+| POST | /games/:id/abandonar | Abandona una partida en despliegue o en curso; gana el rival | 200 |
+| GET | /games/:id/eventos | Lista las cartas de evento reveladas, por ronda | 200 |
+| GET | /games/:id/eventos/:eventoId | Consulta una carta | 200 |
+| POST | /games/:id/eventos | Crea una carta (solo administrador) | 201 |
+| PATCH | /games/:id/eventos/:eventoId | Modifica una carta (solo administrador) | 200 |
+| DELETE | /games/:id/eventos/:eventoId | Elimina una carta (solo administrador) | 204 |
+
+**Turnos:** al terminar el turno, el rival recolecta los recursos de las casillas que ocupa (regla 8), recupera sus 3 acciones (regla 14) y recibe 1 de combustible de reserva si quedó sin combustible ni casillas de recurso (regla 18). La ronda cambia cuando el turno vuelve al jugador que inició la partida, y en ese momento el servidor revela una carta al azar (regla 33). Si el turno vence (3 minutos), el servidor lo cierra al consultar la partida (regla 15). Al terminar la ronda 20 se calcula el puntaje de la regla 36 con los desempates de la regla 37.
+
+**Abandono:** termina la partida con victoria del rival (regla 38). En el lobby se sigue usando `DELETE /games/:id`.
+
+**Estado de la partida:** `GET /games/:id` ahora incluye `eventoRonda` (`{ carta, efecto }`) y, cuando la partida termina, `resultadoFinal` con `motivo` (`FLOTA_DESTRUIDA`, `LIMITE_RONDAS`, `ABANDONO` o `EMPATE`), `ganador` y `puntajes` por jugador.
+
+**Ajustes al protocolo de E2:** `terminar-turno` y `abandonar` responden con un resumen JSON en vez de cuerpo vacío, porque aún no hay WebSocket. Los errores de juego usan `422`, igual que las acciones. Las cartas se revelan y se muestran, pero sus efectos todavía no se aplican.
+
+**Flujo de prueba:** `demo_karla` (turno suyo, ronda 4) → `POST /games/3/terminar-turno` → `demo_diego` → `POST /games/3/terminar-turno` → empieza la ronda 5 con una carta nueva (`GET /games/3/eventos`).

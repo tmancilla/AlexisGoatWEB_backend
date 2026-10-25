@@ -1,5 +1,6 @@
 const ESTADOS = ['ESPERANDO_JUGADOR', 'LISTO_PARA_INICIAR', 'DESPLIEGUE', 'EN_CURSO', 'TERMINADA'];
 const MODOS = ['PRIVADA', 'MATCHMAKING'];
+const { MOTIVOS_FIN } = require('../config/reglas');
 
 module.exports = (sequelize, DataTypes) => {
   const Partida = sequelize.define(
@@ -71,6 +72,19 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DATE,
         allowNull: true,
       },
+
+      jugadorInicialId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+
+      motivoFin: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        validate: {
+          isIn: { args: [MOTIVOS_FIN], msg: `El motivo de fin debe ser uno de: ${MOTIVOS_FIN.join(', ')}.` },
+        },
+      },
     },
     {
       tableName: 'Partidas',
@@ -100,6 +114,7 @@ module.exports = (sequelize, DataTypes) => {
     });
     Partida.belongsTo(models.JugadorPartida, { foreignKey: 'turnoActualId', as: 'turnoActual' });
     Partida.belongsTo(models.JugadorPartida, { foreignKey: 'ganadorId', as: 'ganador' });
+    Partida.belongsTo(models.JugadorPartida, { foreignKey: 'jugadorInicialId', as: 'jugadorInicial' });
   };
 
   Partida.ESTADOS = ESTADOS;

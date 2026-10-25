@@ -1,0 +1,1158 @@
+{
+  "info": {
+    "_postman_id": "2902d607-7f5b-4c9d-b287-8b97ae17b3be",
+    "name": "Guerra del Pacífico - Turnos-Eventos",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "53042977",
+    "_collection_link": "https://go.postman.co/collection/53042977-2902d607-7f5b-4c9d-b287-8b97ae17b3be?source=collection_link",
+    "description": "Turnos, abandono y eventos de partida (Entrega 3).\n\nAntes de usarla: levantar el servidor y cargar los datos de prueba (npm run db:seed). La partida 3 es la partida en curso sembrada: demo_karla (id 6) contra demo_diego (id 7). Si los ids cambian, actualizar las variables partidaId, karla y diego.\n\nEventos: ejecutar primero \"Registrar administrador\" y copiar el id de la respuesta en la variable admin. \"Listar eventos\" y \"Crear evento\" entregan un eventoId para la variable eventoId.\n\nTurnos: \"Consultar turno\" muestra en jugadorActivo a quién le toca (6 Karla, 7 Diego); terminar el turno con ese jugador. \"Abandonar\" termina la partida: ejecutarla al final y luego correr npm run db:reset para recuperar la partida de demostración.\n\nEl usuario se identifica con el header X-Usuario-Id (reemplazo temporal del token JWT de la Entrega 4)."
+  },
+  "item": [
+    {
+      "name": "Turnos",
+      "item": [
+        {
+          "name": "Consultar turno",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{karla}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaId}}"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{karla}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaId}}"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "access-control-allow-origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "content-length",
+                  "value": "656"
+                },
+                {
+                  "key": "date",
+                  "value": "Sun, 25 Oct 2026 16:09:30 GMT"
+                },
+                {
+                  "key": "connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "keep-alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"partidaId\": 3,\n  \"estado\": \"EN_CURSO\",\n  \"ronda\": 5,\n  \"rondaMaxima\": 20,\n  \"jugadorActivo\": 7,\n  \"turnoExpiraEn\": \"2026-10-25T16:12:30.857Z\",\n  \"despliegueExpiraEn\": null,\n  \"eventoRonda\": {\n    \"carta\": \"SABOTAJE\",\n    \"efecto\": \"Un jugador elegido al azar pierde 1 de munición.\"\n  },\n  \"yo\": {\n    \"jugadorId\": 6,\n    \"username\": \"demo_karla\",\n    \"numeroJugador\": 1,\n    \"listo\": true,\n    \"conectado\": true,\n    \"recursos\": {\n      \"combustible\": 9,\n      \"municion\": 6,\n      \"chatarra\": 4\n    },\n    \"accionesRestantes\": 3,\n    \"accionesPorBarco\": {},\n    \"flota\": []\n  },\n  \"rival\": {\n    \"jugadorId\": 7,\n    \"username\": \"demo_diego\",\n    \"numeroJugador\": 2,\n    \"listo\": true,\n    \"conectado\": true,\n    \"segundosParaAbandono\": null,\n    \"barcosAFlote\": 0\n  },\n  \"casillasVisibles\": [],\n  \"contactosEnemigos\": [],\n  \"resultadoFinal\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Terminar turno (id=7)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{diego}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaId}}/terminar-turno",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaId}}",
+                "terminar-turno"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{diego}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaId}}/terminar-turno",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaId}}",
+                    "terminar-turno"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "access-control-allow-origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "content-length",
+                  "value": "106"
+                },
+                {
+                  "key": "date",
+                  "value": "Sun, 25 Oct 2026 16:11:33 GMT"
+                },
+                {
+                  "key": "connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "keep-alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"partidaId\": 3,\n  \"estado\": \"EN_CURSO\",\n  \"ronda\": 6,\n  \"jugadorActivo\": 6,\n  \"turnoExpiraEn\": \"2026-10-25T16:14:33.955Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Terminar turno (id=6)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{karla}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaId}}/terminar-turno",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaId}}",
+                "terminar-turno"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{karla}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaId}}/terminar-turno",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaId}}",
+                    "terminar-turno"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "access-control-allow-origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "content-length",
+                  "value": "106"
+                },
+                {
+                  "key": "date",
+                  "value": "Sun, 25 Oct 2026 16:13:40 GMT"
+                },
+                {
+                  "key": "connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "keep-alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"partidaId\": 3,\n  \"estado\": \"EN_CURSO\",\n  \"ronda\": 6,\n  \"jugadorActivo\": 7,\n  \"turnoExpiraEn\": \"2026-10-25T16:16:40.380Z\"\n}"
+            },
+            {
+              "name": "422 NO ES TU TURNO",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{karla}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaId}}/terminar-turno",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaId}}",
+                    "terminar-turno"
+                  ]
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "access-control-allow-origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "content-length",
+                  "value": "86"
+                },
+                {
+                  "key": "date",
+                  "value": "Sun, 25 Oct 2026 16:14:04 GMT"
+                },
+                {
+                  "key": "connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "keep-alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"codigo\": \"NO_ES_TU_TURNO\",\n  \"mensaje\": \"No es tu turno, espera a que el rival termine.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Abandonar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{karla}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaId}}/abandonar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaId}}",
+                "abandonar"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 ABANDONO",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{karla}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaId}}/abandonar",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaId}}",
+                    "abandonar"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "access-control-allow-origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "content-length",
+                  "value": "68"
+                },
+                {
+                  "key": "date",
+                  "value": "Sun, 25 Oct 2026 16:16:19 GMT"
+                },
+                {
+                  "key": "connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "keep-alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"partidaId\": 3,\n  \"estado\": \"TERMINADA\",\n  \"motivo\": \"ABANDONO\",\n  \"ganador\": 7\n}"
+            }
+          ]
+        },
+        {
+          "name": "Abandonar denuevo (error)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{karla}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaId}}/abandonar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaId}}",
+                "abandonar"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "422 PARTIDA_NO_ACTIVA",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{karla}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaId}}/abandonar",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaId}}",
+                    "abandonar"
+                  ]
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "access-control-allow-origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "content-length",
+                  "value": "150"
+                },
+                {
+                  "key": "date",
+                  "value": "Sun, 25 Oct 2026 16:18:21 GMT"
+                },
+                {
+                  "key": "connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "keep-alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"codigo\": \"PARTIDA_NO_ACTIVA\",\n  \"mensaje\": \"Solo se puede abandonar una partida en despliegue o en curso. Para salir de un lobby usa DELETE /games/:id.\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Eventos",
+      "item": [
+        {
+          "name": "Registrar administrador",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"username\": \"admin_postman\", \"email\": \"admin_postman@uc.cl\", \"password\": \"123456\", \"role\": \"Administrador\", \"codigoAdmin\": \"admin\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"username\": \"admin_postman\", \"email\": \"admin_postman@uc.cl\", \"password\": \"123456\", \"role\": \"Administrador\", \"codigoAdmin\": \"admin\" }",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/register",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "register"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "access-control-allow-origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "content-length",
+                  "value": "101"
+                },
+                {
+                  "key": "date",
+                  "value": "Sun, 25 Oct 2026 15:53:49 GMT"
+                },
+                {
+                  "key": "connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "keep-alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"usuario\": {\n    \"id\": 10,\n    \"username\": \"admin_postman\",\n    \"email\": \"admin_postman@uc.cl\",\n    \"role\": \"Administrador\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Listar eventos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{karla}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaId}}/eventos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaId}}",
+                "eventos"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{karla}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaId}}/eventos",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaId}}",
+                    "eventos"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "access-control-allow-origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "content-length",
+                  "value": "838"
+                },
+                {
+                  "key": "date",
+                  "value": "Sun, 25 Oct 2026 15:56:41 GMT"
+                },
+                {
+                  "key": "connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "keep-alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"eventoId\": 1,\n    \"partidaId\": 3,\n    \"ronda\": 1,\n    \"carta\": \"MAREA_ALTA\",\n    \"efecto\": \"Las corrientes peligrosas no hacen daño esta ronda.\",\n    \"createdAt\": \"2026-10-25T15:36:47.703Z\"\n  },\n  {\n    \"eventoId\": 2,\n    \"partidaId\": 3,\n    \"ronda\": 2,\n    \"carta\": \"SABOTAJE\",\n    \"efecto\": \"Un jugador elegido al azar pierde 1 de munición.\",\n    \"createdAt\": \"2026-10-25T15:36:47.703Z\"\n  },\n  {\n    \"eventoId\": 3,\n    \"partidaId\": 3,\n    \"ronda\": 3,\n    \"carta\": \"BOTIN_FLOTANTE\",\n    \"efecto\": \"Aparece un bono de 2 de combustible o munición en una casilla vacía al azar.\",\n    \"createdAt\": \"2026-10-25T15:36:47.703Z\"\n  },\n  {\n    \"eventoId\": 4,\n    \"partidaId\": 3,\n    \"ronda\": 4,\n    \"carta\": \"TORMENTA\",\n    \"efecto\": \"Radio de detección -1 para todos los barcos esta ronda.\",\n    \"createdAt\": \"2026-10-25T15:36:47.703Z\"\n  },\n  {\n    \"eventoId\": 5,\n    \"partidaId\": 3,\n    \"ronda\": 5,\n    \"carta\": \"SABOTAJE\",\n    \"efecto\": \"Un jugador elegido al azar pierde 1 de munición.\",\n    \"createdAt\": \"2026-10-25T15:42:52.227Z\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Consultar evento",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{karla}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaId}}/eventos/{{eventoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaId}}",
+                "eventos",
+                "{{eventoId}}"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{karla}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaId}}/eventos/{{eventoId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaId}}",
+                    "eventos",
+                    "{{eventoId}}"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "access-control-allow-origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "content-length",
+                  "value": "162"
+                },
+                {
+                  "key": "date",
+                  "value": "Sun, 25 Oct 2026 15:59:31 GMT"
+                },
+                {
+                  "key": "connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "keep-alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"eventoId\": 1,\n  \"partidaId\": 3,\n  \"ronda\": 1,\n  \"carta\": \"MAREA_ALTA\",\n  \"efecto\": \"Las corrientes peligrosas no hacen daño esta ronda.\",\n  \"createdAt\": \"2026-10-25T15:36:47.703Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Crear evento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{admin}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"ronda\": 20, \"tipoCarta\": \"SABOTAJE\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaId}}/eventos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaId}}",
+                "eventos"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{admin}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"ronda\": 20, \"tipoCarta\": \"SABOTAJE\" }",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaId}}/eventos",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaId}}",
+                    "eventos"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "access-control-allow-origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "content-length",
+                  "value": "158"
+                },
+                {
+                  "key": "date",
+                  "value": "Sun, 25 Oct 2026 16:01:19 GMT"
+                },
+                {
+                  "key": "connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "keep-alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"eventoId\": 6,\n  \"partidaId\": 3,\n  \"ronda\": 20,\n  \"carta\": \"SABOTAJE\",\n  \"efecto\": \"Un jugador elegido al azar pierde 1 de munición.\",\n  \"createdAt\": \"2026-10-25T16:01:19.252Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Crear evento como jugador (error)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{karla}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"ronda\": 19, \"tipoCarta\": \"SABOTAJE\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaId}}/eventos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaId}}",
+                "eventos"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "403 SOLO ADMIN",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{karla}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"ronda\": 19, \"tipoCarta\": \"SABOTAJE\" }",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaId}}/eventos",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaId}}",
+                    "eventos"
+                  ]
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "access-control-allow-origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "content-length",
+                  "value": "108"
+                },
+                {
+                  "key": "date",
+                  "value": "Sun, 25 Oct 2026 16:03:12 GMT"
+                },
+                {
+                  "key": "connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "keep-alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"codigo\": \"SOLO_ADMINISTRADOR\",\n  \"mensaje\": \"Solo un administrador puede crear, modificar o eliminar eventos.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Actualizar evento",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{admin}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"tipoCarta\": \"MAREA_ALTA\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaId}}/eventos/{{eventoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaId}}",
+                "eventos",
+                "{{eventoId}}"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{admin}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"tipoCarta\": \"MAREA_ALTA\" }",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaId}}/eventos/{{eventoId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaId}}",
+                    "eventos",
+                    "{{eventoId}}"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "access-control-allow-origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "content-length",
+                  "value": "163"
+                },
+                {
+                  "key": "date",
+                  "value": "Sun, 25 Oct 2026 16:05:19 GMT"
+                },
+                {
+                  "key": "connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "keep-alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"eventoId\": 6,\n  \"partidaId\": 3,\n  \"ronda\": 20,\n  \"carta\": \"MAREA_ALTA\",\n  \"efecto\": \"Las corrientes peligrosas no hacen daño esta ronda.\",\n  \"createdAt\": \"2026-10-25T16:01:19.252Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Eliminar evento",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{admin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaId}}/eventos/{{eventoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaId}}",
+                "eventos",
+                "{{eventoId}}"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "204 No Content",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{admin}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaId}}/eventos/{{eventoId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaId}}",
+                    "eventos",
+                    "{{eventoId}}"
+                  ]
+                }
+              },
+              "status": "No Content",
+              "code": 204,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "access-control-allow-origin",
+                  "value": "http://localhost:5173"
+                },
+                {
+                  "key": "date",
+                  "value": "Sun, 25 Oct 2026 16:07:46 GMT"
+                },
+                {
+                  "key": "connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "keep-alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "partidaId",
+      "value": "3"
+    },
+    {
+      "key": "karla",
+      "value": "6"
+    },
+    {
+      "key": "diego",
+      "value": "7"
+    },
+    {
+      "key": "admin",
+      "value": ""
+    },
+    {
+      "key": "eventoId",
+      "value": ""
+    }
+  ]
+}

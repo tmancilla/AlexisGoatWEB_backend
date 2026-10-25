@@ -13,7 +13,7 @@ Para mi parte de la Entrega 3 usé Claude (Claude Code, en la aplicación de esc
 | Estado filtrado y acción de mover | `src/services/estado.service.js`, `src/services/accion.service.js`, `realizarAccion` en `src/controllers/accion.controller.js` |
 | Cambios en archivos de Tomás | las llamadas a `iniciarDespliegue` en `partida.service.js`, las rutas en `partida.routes.js` y el estado en `obtenerPartida` |
 | Datos de prueba y documentación | `src/seeders/005-demo-tablero.js`, `docs/postman/tablero.postman_collection.json`, la sección "Tablero, despliegue y acciones" del README |
-| Frontend | `src/pages/Partida/Partida.jsx` (conexión de la pantalla de partida al backend) |
+| Frontend | `src/pages/Partida/Partida.jsx` (conexión de la pantalla de partida al backend, incluidos los botones de terminar turno y abandonar de Tomás) |
 
 También la usé para preparar mi entorno local (PostgreSQL y Node), resolver el conflicto de merge de mi primer PR y redactar los mensajes al grupo.
 
@@ -30,6 +30,7 @@ Los prompts principales, en orden, fueron estos (resumidos):
 7. (15/10) "A en las dos, continúa con el paso 5": la ruta de despliegue en el archivo de Tomás y el plazo de 2 minutos revisado al consultar la partida.
 8. (21/10) "A en las dos, continúa con el paso 7": tomar la tabla `Acciones` y usar los códigos 422 de la Entrega 4.
 9. (24/10) "Revisa lo nuevo que se subió a ambos repos y continúa con mi parte" / "Termina con mis partes finales y júntalo en un PR por repo."
+10. (25/10) "Hazlo de nuevo si es necesario, ya que hubo cambios de mis compañeros", donde revisamos que el seeder de Tomás ya no creaba el tablero de la partida en curso, actualizamos la colección de Postman y el README, y conectamos terminar turno y abandonar en la pantalla de partida.
 
 Entre cada paso le hice preguntas para entender lo que se estaba haciendo, por ejemplo qué hacen `up` y `down` en una migración, por qué las migraciones llevan número, por qué hay validaciones en el modelo y además restricciones en la migración, la diferencia entre `hasMany`, `belongsTo` y `belongsToMany`, por qué el servidor nunca manda el estado completo, cómo funciona el límite de 2 minutos sin temporizadores y qué es el `lock` cuando dos jugadores despliegan al mismo tiempo.
 

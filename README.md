@@ -186,9 +186,9 @@ Las reglas fijas del juego (stats de los barcos, zonas de despliegue, casillas e
 - Las jugadas que violan las reglas (fuera de turno, sin recursos, fuera de alcance, etc.) responden `422`, como pide la Entrega 4. Los datos mal formados responden `400`, lo que no es tuyo `403` y lo que no existe `404`. Códigos nuevos: `DESTINO_INVALIDO`, `ACCION_NO_DISPONIBLE` y `TIPO_ACCION_INVALIDO`.
 - El resultado de `MOVER` puede incluir `chatarraRecogida` y `hundido`.
 
-**Pendiente:** las acciones `DISPARAR`, `VIGIA` y `MEJORAR`, el combate cuerpo a cuerpo, la chatarra al hundirse y el "contacto perdido". `eventoRonda` y `resultadoFinal` quedan en `null` hasta que existan las cartas de evento y el fin de partida, y el cambio de turno corresponde al área de partidas.
+**Pendiente:** las acciones `DISPARAR`, `VIGIA` y `MEJORAR`, el combate cuerpo a cuerpo, la chatarra al hundirse y el "contacto perdido". El cambio de turno, el abandono, las cartas de evento (`eventoRonda`) y el resultado final (`resultadoFinal`) están en la sección "Turnos, abandono y eventos de partida".
 
-**Datos de prueba:** el seeder `005-demo-tablero` completa la partida en curso de `demo_karla` contra `demo_diego` (partida 3, ronda 4, turno de Karla) con un tablero fijo, los 8 barcos, una mejora, una corriente revelada y algunas acciones de historial.
+**Datos de prueba:** el seeder `005-demo-tablero` carga el tablero y los barcos de la partida en curso de `demo_karla` contra `demo_diego` (partida 3, ronda 4, turno de Karla), junto con una mejora, una corriente revelada y algunas acciones de historial. Las cartas de evento de esa partida vienen del seeder `002`.
 
 **Postman:** [docs/postman/tablero.postman_collection.json](docs/postman/tablero.postman_collection.json). Después de `npm run db:reset`, ejecutar las tres carpetas en orden con el Runner. Cada petición trae un ejemplo de respuesta y tests que revisan el código HTTP.
 
@@ -204,6 +204,8 @@ Con el backend y el frontend corriendo (ver "Ejecutar ambos proyectos") y la bas
 2. Entrar a `http://localhost:5173/tablero?partidaId=3`.
 3. Hacer click en un barco propio y después en una casilla verde para moverlo. El tablero, los recursos, las acciones y la bitácora se actualizan con lo que responde el servidor, y si la jugada no es válida se muestra el mensaje de error.
 4. En una ventana privada, iniciar sesión con `demo_diego` y abrir la misma partida: se ve su propia versión del mapa y el servidor le rechaza las jugadas porque no es su turno.
+5. Karla aprieta "Terminar turno". La pantalla de Diego se actualiza sola: ahora puede mover y, al terminar su turno, empieza la ronda 5 con una carta de evento nueva.
+6. Con "Abandonar" la partida termina con victoria del rival y se muestra el resultado.
 
 **Partida desde cero:**
 
@@ -212,7 +214,7 @@ Con el backend y el frontend corriendo (ver "Ejecutar ambos proyectos") y la bas
 3. En Preparación, cada uno ubica sus 4 barcos en su zona y confirma antes de que se acaben los 2 minutos.
 4. Cuando los dos confirman, el servidor sortea quién parte y ambos pasan al tablero.
 
-El mismo ciclo por API es: `PATCH /games/2` (Ana inicia) → `POST /games/2/desplegar` (Ana) → `POST /games/2/desplegar` (Beto) → `GET /games/2` → `POST /games/2/acciones`, y está armado en la carpeta 2 de la colección de Postman.
+El mismo ciclo por API es: `PATCH /games/2` (Ana inicia) → `POST /games/2/desplegar` (Ana) → `POST /games/2/desplegar` (Beto) → `GET /games/2` → `POST /games/2/acciones` → `POST /games/2/terminar-turno`. Hasta el despliegue está armado en la carpeta 2 de la colección de tablero, y los turnos en la colección de turnos y eventos.
 
 ## Integración con el frontend
 

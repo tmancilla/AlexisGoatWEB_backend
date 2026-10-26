@@ -70,7 +70,8 @@ Se implementaron las siguientes rutas:
 
 Para registrar un administrador, se debe enviar `role: "Administrador"`
 y `codigoAdmin`. El servidor compara el código recibido con la variable
-`CODIGO_ADMIN`, que cada integrante debe configurar en su `.env`.
+`CODIGO_ADMIN` del `.env`, que en `.env.example` viene como `admin` para
+desarrollo (en producción se debe cambiar por un valor propio).
 
 ### Ajustes al protocolo de E2
 
@@ -132,7 +133,7 @@ Las partidas en curso y terminada incluyen un tablero fijo (100 casillas, con la
 
 **Flujo de prueba:** `POST /games` → `POST /games/<codigo>/join` → `GET /games/<id>` → `PATCH /games/<id>` → `DELETE /games/<id>`.
 
-**Postman:** [docs/postman/partidas.postman_collection.json](docs/postman/partidas.postman_collection.json). Poner en `jugadorA` y `jugadorB` los ids de `demo_libre1` y `demo_libre2` y ejecutar en orden.
+**Postman:** [docs/postman/partidas.postman_collection.json](docs/postman/partidas.postman_collection.json). Las variables `jugadorA` y `jugadorB` ya traen los ids de `demo_libre1` y `demo_libre2` en una base recién reseteada; ejecutar las carpetas en orden con el Runner (`partidaId` y `codigo` se guardan solos).
 
 ### Postman: usuarios y autenticación
 
@@ -149,7 +150,7 @@ esperados.
 
 ## Tablero, despliegue y acciones — Entrega 3
 
-Modelos del tablero y la flota, con sus migraciones (`004` a `009`), asociaciones y validaciones:
+Modelos del tablero y la flota, con sus migraciones (`004` a `009` y `012`), asociaciones y validaciones:
 
 | Tabla | Para qué |
 |---|---|
@@ -159,6 +160,7 @@ Modelos del tablero y la flota, con sus migraciones (`004` a `009`), asociacione
 | `CasillasReveladas` | Lo que cada jugador ya descubrió del mapa (relación "descubre" del ER) |
 | `MejorasBarco` | Las mejoras que compró cada barco (relación "adquiere" del ER) |
 | `Acciones` | Cada jugada con su ronda y su resultado (entidad Accion del ER) |
+| `Combates` | Cada enfrentamiento con su barco atacante, su barco defensor, los dados y si hubo impacto (entidad Combate del ER, relaciones "ataca" y "defiende") |
 
 Las reglas fijas del juego (stats de los barcos, zonas de despliegue, casillas especiales y tiempos) están en `src/config/reglas.js`, y las funciones del tablero (generar el mapa, distancias, visión y rutas) en `src/utils/tablero.js`.
 
@@ -169,6 +171,11 @@ Las reglas fijas del juego (stats de los barcos, zonas de despliegue, casillas e
 | POST | /games/:id/acciones | Realizar una acción (por ahora `MOVER`) | 200 |
 | GET | /games/:id/acciones | Listar mis acciones en la partida | 200 |
 | GET / PATCH / DELETE | /games/:id/acciones/:accionId | Consultar, corregir o borrar una acción (corregir y borrar solo en partidas terminadas) | 200 / 204 |
+| GET | /games/:id/combates | Listar los combates de la partida | 200 |
+| GET | /games/:id/combates/:combateId | Consultar un combate | 200 |
+| POST | /games/:id/combates | Crear un combate (solo administrador) | 201 |
+| PATCH | /games/:id/combates/:combateId | Modificar un combate (solo administrador) | 200 |
+| DELETE | /games/:id/combates/:combateId | Eliminar un combate (solo administrador) | 204 |
 
 **Lo que hace el servidor:**
 
@@ -177,6 +184,7 @@ Las reglas fijas del juego (stats de los barcos, zonas de despliegue, casillas e
 - El estado solo incluye lo que ve cada jugador: las casillas dentro del radio de detección de sus barcos a flote (distancia Manhattan) y las que ya reveló. Las corrientes que no ha descubierto se ven como agua y, del rival, solo se mandan los barcos dentro de su radio y cuántos le quedan a flote.
 - `MOVER` valida en el orden del protocolo, busca el camino más corto que esquive los barcos visibles y cobra el combustible de las casillas recorridas. En el camino recoge la chatarra de los naufragios, se frena en las corrientes (−1 de casco) o junto a un enemigo que no se veía, y controla el máximo de 2 acciones por barco.
 - Las acciones de una misma partida se procesan de a una (bloqueo de la fila de la partida), así dos peticiones simultáneas no se pisan.
+- Un combate valida que el atacante y el defensor sean barcos de la partida y de jugadores distintos. En uno a distancia no se guardan dados, y en uno cuerpo a cuerpo van los dos dados, sin empate (se vuelve a lanzar, regla 26), y hay impacto solo si el atacante saca el más alto.
 
 **Ajustes al protocolo de E2:**
 
@@ -186,11 +194,11 @@ Las reglas fijas del juego (stats de los barcos, zonas de despliegue, casillas e
 - Las jugadas que violan las reglas (fuera de turno, sin recursos, fuera de alcance, etc.) responden `422`, como pide la Entrega 4. Los datos mal formados responden `400`, lo que no es tuyo `403` y lo que no existe `404`. Códigos nuevos: `DESTINO_INVALIDO`, `ACCION_NO_DISPONIBLE` y `TIPO_ACCION_INVALIDO`.
 - El resultado de `MOVER` puede incluir `chatarraRecogida` y `hundido`.
 
-**Pendiente:** las acciones `DISPARAR`, `VIGIA` y `MEJORAR`, el combate cuerpo a cuerpo, la chatarra al hundirse y el "contacto perdido". El cambio de turno, el abandono, las cartas de evento (`eventoRonda`) y el resultado final (`resultadoFinal`) están en la sección "Turnos, abandono y eventos de partida".
+**Pendiente:** las acciones `DISPARAR`, `VIGIA` y `MEJORAR`, la resolución automática de los combates dentro del juego (la tabla y su CRUD ya existen), la chatarra al hundirse y el "contacto perdido". El cambio de turno, el abandono, las cartas de evento (`eventoRonda`) y el resultado final (`resultadoFinal`) están en la sección "Turnos, abandono y eventos de partida".
 
-**Datos de prueba:** el seeder `005-demo-tablero` carga el tablero y los barcos de la partida en curso de `demo_karla` contra `demo_diego` (partida 3, ronda 4, turno de Karla), junto con una mejora, una corriente revelada y algunas acciones de historial. Las cartas de evento de esa partida vienen del seeder `002`.
+**Datos de prueba:** el seeder `005-demo-tablero` carga el tablero y los barcos de la partida en curso de `demo_karla` contra `demo_diego` (partida 3, ronda 4, turno de Karla), junto con una mejora, una corriente revelada y algunas acciones de historial. El seeder `006-demo-historial` agrega los combates y las acciones de la partida terminada de `demo_elena` contra `demo_fede` (partida 4), que explican cómo se hundió la flota de Fede, y un disparo de Karla en la partida en curso. Las cartas de evento vienen del seeder `002`.
 
-**Postman:** [docs/postman/tablero.postman_collection.json](docs/postman/tablero.postman_collection.json). Después de `npm run db:reset`, ejecutar las tres carpetas en orden con el Runner. Cada petición trae un ejemplo de respuesta y tests que revisan el código HTTP.
+**Postman:** [docs/postman/tablero.postman_collection.json](docs/postman/tablero.postman_collection.json). Después de `npm run db:reset`, ejecutar las cuatro carpetas en orden con el Runner (la última es la de combates). Cada petición trae un ejemplo de respuesta y tests que revisan el código HTTP.
 
 ### Cómo simular el ciclo de juego
 
@@ -323,3 +331,17 @@ el header `X-Usuario-Id` explicado anteriormente.
 **Ajustes al protocolo de E2:** `terminar-turno` y `abandonar` responden con un resumen JSON en vez de cuerpo vacío, porque aún no hay WebSocket. Los errores de juego usan `422`, igual que las acciones. Las cartas se revelan y se muestran, pero sus efectos todavía no se aplican.
 
 **Flujo de prueba:** `demo_karla` (turno suyo, ronda 4) → `POST /games/3/terminar-turno` → `demo_diego` → `POST /games/3/terminar-turno` → empieza la ronda 5 con una carta nueva (`GET /games/3/eventos`).
+
+## Colecciones de Postman y bitácora de jugadas
+
+| Colección | Qué prueba | Peticiones |
+|---|---|---|
+| [usuarios](docs/postman/usuarios.postman_collection.json) | CRUD de usuarios, registro e inicio de sesión | 7 |
+| [partidas](docs/postman/partidas.postman_collection.json) | Lobby privado, matchmaking y errores de partidas | 16 |
+| [tablero](docs/postman/tablero.postman_collection.json) | Estado de la partida, despliegue, mover y combates | 28 |
+| [acciones](docs/postman/acciones.postman_collection.json) | Historial de acciones: consultar, corregir y borrar | 4 |
+| [turnos-eventos](docs/postman/turnos-eventos.postman_collection.json) | Terminar turno, abandonar y cartas de evento | 12 |
+
+Cada colección modifica los datos de prueba (crea partidas, mueve barcos o termina la partida), así que hay que correr `npm run db:reset` antes de ejecutar cada una con el Runner. Las variables traen los ids de una base recién reseteada y el resto de los ids se guardan solos. Todas las peticiones tienen un ejemplo de respuesta y tests que revisan el código HTTP.
+
+La [bitácora de ejecución de jugadas](docs/bitacora-jugadas.md) registra una partida completa jugada contra la API, desde el registro de dos usuarios hasta el resultado final, con cada petición y la respuesta del servidor.

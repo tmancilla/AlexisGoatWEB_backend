@@ -4,6 +4,7 @@ const despliegueController = require('../controllers/despliegue.controller');
 const accionController = require('../controllers/accion.controller');
 const turnoController = require('../controllers/turno.controller');
 const eventoController = require('../controllers/evento.controller');
+const combateController = require('../controllers/combate.controller');
 const usuarioActual = require('../middlewares/usuarioActual');
 
 const router = new Router({
@@ -29,6 +30,11 @@ router.get('/:id/eventos/:eventoId', eventoController.obtenerEvento);
 router.post('/:id/eventos', eventoController.crearEvento);
 router.patch('/:id/eventos/:eventoId', eventoController.actualizarEvento);
 router.delete('/:id/eventos/:eventoId', eventoController.eliminarEvento);
+router.get('/:id/combates', combateController.listarCombates);
+router.get('/:id/combates/:combateId', combateController.obtenerCombate);
+router.post('/:id/combates', combateController.crearCombate);
+router.patch('/:id/combates/:combateId', combateController.actualizarCombate);
+router.delete('/:id/combates/:combateId', combateController.eliminarCombate);
 router.get('/:id', partidaController.obtenerPartida);
 router.patch('/:id', partidaController.actualizarPartida);
 router.delete('/:id', partidaController.cancelarPartida);

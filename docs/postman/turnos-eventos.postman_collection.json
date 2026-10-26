@@ -5,7 +5,7 @@
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "53042977",
     "_collection_link": "https://go.postman.co/collection/53042977-2902d607-7f5b-4c9d-b287-8b97ae17b3be?source=collection_link",
-    "description": "Turnos, abandono y eventos de partida (Entrega 3).\n\nAntes de usarla: levantar el servidor y cargar los datos de prueba (npm run db:seed). La partida 3 es la partida en curso sembrada: demo_karla (id 6) contra demo_diego (id 7). Si los ids cambian, actualizar las variables partidaId, karla y diego.\n\nEventos: ejecutar primero \"Registrar administrador\" y copiar el id de la respuesta en la variable admin. \"Listar eventos\" y \"Crear evento\" entregan un eventoId para la variable eventoId.\n\nTurnos: \"Consultar turno\" muestra en jugadorActivo a quién le toca (6 Karla, 7 Diego); terminar el turno con ese jugador. \"Abandonar\" termina la partida: ejecutarla al final y luego correr npm run db:reset para recuperar la partida de demostración.\n\nEl usuario se identifica con el header X-Usuario-Id (reemplazo temporal del token JWT de la Entrega 4)."
+    "description": "Turnos, abandono y eventos de partida (Entrega 3).\n\nAntes de usarla: recrear la base con los datos de prueba (npm run db:reset) y levantar el servidor. La partida 3 es la partida en curso sembrada: demo_karla (id 6) contra demo_diego (id 7), ronda 4 y turno de Karla.\n\nEjecutar las carpetas en orden con el Runner. Turnos: Karla termina su turno, después Diego, y empieza la ronda 5 con una carta nueva; \"Abandonar\" termina la partida. Eventos: el administrador se registra con el CODIGO_ADMIN del .env (por defecto \"admin\") y las variables admin y eventoId se guardan solas."
   },
   "item": [
     {
@@ -59,41 +59,99 @@
               "_postman_previewlanguage": "json",
               "header": [
                 {
-                  "key": "vary",
-                  "value": "Origin"
-                },
-                {
-                  "key": "access-control-allow-origin",
-                  "value": "http://localhost:5173"
-                },
-                {
-                  "key": "content-type",
+                  "key": "Content-Type",
                   "value": "application/json; charset=utf-8"
-                },
-                {
-                  "key": "content-length",
-                  "value": "656"
-                },
-                {
-                  "key": "date",
-                  "value": "Sun, 25 Oct 2026 16:09:30 GMT"
-                },
-                {
-                  "key": "connection",
-                  "value": "keep-alive"
-                },
-                {
-                  "key": "keep-alive",
-                  "value": "timeout=5"
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"partidaId\": 3,\n  \"estado\": \"EN_CURSO\",\n  \"ronda\": 5,\n  \"rondaMaxima\": 20,\n  \"jugadorActivo\": 7,\n  \"turnoExpiraEn\": \"2026-10-25T16:12:30.857Z\",\n  \"despliegueExpiraEn\": null,\n  \"eventoRonda\": {\n    \"carta\": \"SABOTAJE\",\n    \"efecto\": \"Un jugador elegido al azar pierde 1 de munición.\"\n  },\n  \"yo\": {\n    \"jugadorId\": 6,\n    \"username\": \"demo_karla\",\n    \"numeroJugador\": 1,\n    \"listo\": true,\n    \"conectado\": true,\n    \"recursos\": {\n      \"combustible\": 9,\n      \"municion\": 6,\n      \"chatarra\": 4\n    },\n    \"accionesRestantes\": 3,\n    \"accionesPorBarco\": {},\n    \"flota\": []\n  },\n  \"rival\": {\n    \"jugadorId\": 7,\n    \"username\": \"demo_diego\",\n    \"numeroJugador\": 2,\n    \"listo\": true,\n    \"conectado\": true,\n    \"segundosParaAbandono\": null,\n    \"barcosAFlote\": 0\n  },\n  \"casillasVisibles\": [],\n  \"contactosEnemigos\": [],\n  \"resultadoFinal\": null\n}"
+              "body": "{\n  \"partidaId\": 3,\n  \"estado\": \"EN_CURSO\",\n  \"ronda\": 4,\n  \"rondaMaxima\": 20,\n  \"jugadorActivo\": 6,\n  \"turnoExpiraEn\": null,\n  \"despliegueExpiraEn\": null,\n  \"eventoRonda\": {\n    \"carta\": \"TORMENTA\",\n    \"efecto\": \"Radio de detección -1 para todos los barcos esta ronda.\"\n  },\n  \"yo\": {\n    \"jugadorId\": 6,\n    \"username\": \"demo_karla\",\n    \"numeroJugador\": 1,\n    \"listo\": true,\n    \"conectado\": true,\n    \"recursos\": {\n      \"combustible\": 9,\n      \"municion\": 6,\n      \"chatarra\": 4\n    },\n    \"accionesRestantes\": 2,\n    \"accionesPorBarco\": {\n      \"9\": 1,\n      \"10\": 0,\n      \"11\": 0,\n      \"12\": 0\n    },\n    \"flota\": [\n      {\n        \"barcoId\": 9,\n        \"tipo\": \"LANCHA\",\n        \"casilla\": {\n          \"x\": 5,\n          \"y\": 4\n        },\n        \"casco\": 1,\n        \"cascoMaximo\": 1,\n        \"movimiento\": 3,\n        \"alcance\": 2,\n        \"deteccion\": 3,\n        \"dado\": \"d4\",\n        \"mejoras\": [],\n        \"aFlote\": true\n      },\n      {\n        \"barcoId\": 10,\n        \"tipo\": \"FRAGATA\",\n        \"casilla\": {\n          \"x\": 3,\n          \"y\": 3\n        },\n        \"casco\": 1,\n        \"cascoMaximo\": 2,\n        \"movimiento\": 2,\n        \"alcance\": 3,\n        \"deteccion\": 2,\n        \"dado\": \"d6\",\n        \"mejoras\": [],\n        \"aFlote\": true\n      },\n      {\n        \"barcoId\": 11,\n        \"tipo\": \"DESTRUCTOR\",\n        \"casilla\": {\n          \"x\": 7,\n          \"y\": 3\n        },\n        \"casco\": 4,\n        \"cascoMaximo\": 4,\n        \"movimiento\": 2,\n        \"alcance\": 4,\n        \"deteccion\": 2,\n        \"dado\": \"d8\",\n        \"mejoras\": [\n          \"BLINDAJE\"\n        ],\n        \"aFlote\": true\n      },\n      {\n        \"barcoId\": 12,\n        \"tipo\": \"ACORAZADO\",\n        \"casilla\": {\n          \"x\": 4,\n          \"y\": 2\n        },\n        \"casco\": 4,\n        \"cascoMaximo\": 4,\n        \"movimiento\": 1,\n        \"alcance\": 5,\n        \"deteccion\": 1,\n        \"dado\": \"d10\",\n        \"mejoras\": [],\n        \"aFlote\": true\n      }\n    ]\n  },\n  \"rival\": {\n    \"jugadorId\": 7,\n    \"username\": \"demo_diego\",\n    \"numeroJugador\": 2,\n    \"listo\": true,\n    \"conectado\": true,\n    \"segundosParaAbandono\": null,\n    \"barcosAFlote\": 4\n  },\n  \"casillasVisibles\": [\n    {\n      \"x\": 3,\n      \"y\": 1,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 4,\n      \"y\": 1,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 5,\n      \"y\": 1,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 7,\n      \"y\": 1,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 2,\n      \"y\": 2,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 3,\n      \"y\": 2,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 4,\n      \"y\": 2,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 5,\n      \"y\": 2,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 6,\n      \"y\": 2,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 7,\n      \"y\": 2,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 8,\n      \"y\": 2,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 1,\n      \"y\": 3,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 2,\n      \"y\": 3,\n      \"tipo\": \"CORRIENTE_PELIGROSA\",\n      \"reveladaEnRonda\": 2\n    },\n    {\n      \"x\": 3,\n      \"y\": 3,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 4,\n      \"y\": 3,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 5,\n      \"y\": 3,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 6,\n      \"y\": 3,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 7,\n      \"y\": 3,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 8,\n      \"y\": 3,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 9,\n      \"y\": 3,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 2,\n      \"y\": 4,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 3,\n      \"y\": 4,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 4,\n      \"y\": 4,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 5,\n      \"y\": 4,\n      \"tipo\": \"POZO_PETROLERO\",\n      \"ocupadaPor\": 9\n    },\n    {\n      \"x\": 6,\n      \"y\": 4,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 7,\n      \"y\": 4,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 8,\n      \"y\": 4,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 3,\n      \"y\": 5,\n      \"tipo\": \"POZO_PETROLERO\",\n      \"ocupadaPor\": null\n    },\n    {\n      \"x\": 4,\n      \"y\": 5,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 5,\n      \"y\": 5,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 6,\n      \"y\": 5,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 7,\n      \"y\": 5,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 4,\n      \"y\": 6,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 5,\n      \"y\": 6,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 6,\n      \"y\": 6,\n      \"tipo\": \"AGUA_ABIERTA\"\n    },\n    {\n      \"x\": 5,\n      \"y\": 7,\n      \"tipo\": \"AGUA_ABIERTA\"\n    }\n  ],\n  \"contactosEnemigos\": [\n    {\n      \"barcoId\": 13,\n      \"tipo\": \"LANCHA\",\n      \"casilla\": {\n        \"x\": 6,\n        \"y\": 6\n      },\n      \"casco\": 1,\n      \"aFlote\": true,\n      \"visible\": true\n    }\n  ],\n  \"resultadoFinal\": null\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('parte jugando Karla', () => pm.expect(pm.response.json().jugadorActivo).to.eql(Number(pm.collectionVariables.get('karla'))));"
+                ]
+              }
             }
           ]
         },
         {
-          "name": "Terminar turno (id=7)",
+          "name": "Terminar turno (Karla, id=6)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{karla}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaId}}/terminar-turno",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaId}}",
+                "terminar-turno"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Usuario-Id",
+                    "value": "{{karla}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/games/{{partidaId}}/terminar-turno",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "games",
+                    "{{partidaId}}",
+                    "terminar-turno"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"partidaId\": 3,\n  \"estado\": \"EN_CURSO\",\n  \"ronda\": 4,\n  \"jugadorActivo\": 7,\n  \"turnoExpiraEn\": \"2026-10-26T00:12:43.755Z\"\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Terminar turno (Diego, id=7)",
           "request": {
             "method": "POST",
             "header": [
@@ -142,177 +200,24 @@
               "_postman_previewlanguage": "json",
               "header": [
                 {
-                  "key": "vary",
-                  "value": "Origin"
-                },
-                {
-                  "key": "access-control-allow-origin",
-                  "value": "http://localhost:5173"
-                },
-                {
-                  "key": "content-type",
+                  "key": "Content-Type",
                   "value": "application/json; charset=utf-8"
-                },
-                {
-                  "key": "content-length",
-                  "value": "106"
-                },
-                {
-                  "key": "date",
-                  "value": "Sun, 25 Oct 2026 16:11:33 GMT"
-                },
-                {
-                  "key": "connection",
-                  "value": "keep-alive"
-                },
-                {
-                  "key": "keep-alive",
-                  "value": "timeout=5"
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"partidaId\": 3,\n  \"estado\": \"EN_CURSO\",\n  \"ronda\": 6,\n  \"jugadorActivo\": 6,\n  \"turnoExpiraEn\": \"2026-10-25T16:14:33.955Z\"\n}"
+              "body": "{\n  \"partidaId\": 3,\n  \"estado\": \"EN_CURSO\",\n  \"ronda\": 5,\n  \"jugadorActivo\": 6,\n  \"turnoExpiraEn\": \"2026-10-26T00:12:43.798Z\"\n}"
             }
-          ]
-        },
-        {
-          "name": "Terminar turno (id=6)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "X-Usuario-Id",
-                "value": "{{karla}}"
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('empieza una ronda nueva', () => pm.expect(pm.response.json().ronda).to.eql(5));"
+                ]
               }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/games/{{partidaId}}/terminar-turno",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "games",
-                "{{partidaId}}",
-                "terminar-turno"
-              ]
-            }
-          },
-          "response": [
-            {
-              "name": "200 OK",
-              "originalRequest": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "X-Usuario-Id",
-                    "value": "{{karla}}"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/games/{{partidaId}}/terminar-turno",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "games",
-                    "{{partidaId}}",
-                    "terminar-turno"
-                  ]
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "vary",
-                  "value": "Origin"
-                },
-                {
-                  "key": "access-control-allow-origin",
-                  "value": "http://localhost:5173"
-                },
-                {
-                  "key": "content-type",
-                  "value": "application/json; charset=utf-8"
-                },
-                {
-                  "key": "content-length",
-                  "value": "106"
-                },
-                {
-                  "key": "date",
-                  "value": "Sun, 25 Oct 2026 16:13:40 GMT"
-                },
-                {
-                  "key": "connection",
-                  "value": "keep-alive"
-                },
-                {
-                  "key": "keep-alive",
-                  "value": "timeout=5"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"partidaId\": 3,\n  \"estado\": \"EN_CURSO\",\n  \"ronda\": 6,\n  \"jugadorActivo\": 7,\n  \"turnoExpiraEn\": \"2026-10-25T16:16:40.380Z\"\n}"
-            },
-            {
-              "name": "422 NO ES TU TURNO",
-              "originalRequest": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "X-Usuario-Id",
-                    "value": "{{karla}}"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/games/{{partidaId}}/terminar-turno",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "games",
-                    "{{partidaId}}",
-                    "terminar-turno"
-                  ]
-                }
-              },
-              "status": "Unprocessable Entity",
-              "code": 422,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "vary",
-                  "value": "Origin"
-                },
-                {
-                  "key": "access-control-allow-origin",
-                  "value": "http://localhost:5173"
-                },
-                {
-                  "key": "content-type",
-                  "value": "application/json; charset=utf-8"
-                },
-                {
-                  "key": "content-length",
-                  "value": "86"
-                },
-                {
-                  "key": "date",
-                  "value": "Sun, 25 Oct 2026 16:14:04 GMT"
-                },
-                {
-                  "key": "connection",
-                  "value": "keep-alive"
-                },
-                {
-                  "key": "keep-alive",
-                  "value": "timeout=5"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"codigo\": \"NO_ES_TU_TURNO\",\n  \"mensaje\": \"No es tu turno, espera a que el rival termine.\"\n}"
             }
           ]
         },
@@ -340,7 +245,7 @@
           },
           "response": [
             {
-              "name": "200 ABANDONO",
+              "name": "200 OK",
               "originalRequest": {
                 "method": "POST",
                 "header": [
@@ -366,36 +271,23 @@
               "_postman_previewlanguage": "json",
               "header": [
                 {
-                  "key": "vary",
-                  "value": "Origin"
-                },
-                {
-                  "key": "access-control-allow-origin",
-                  "value": "http://localhost:5173"
-                },
-                {
-                  "key": "content-type",
+                  "key": "Content-Type",
                   "value": "application/json; charset=utf-8"
-                },
-                {
-                  "key": "content-length",
-                  "value": "68"
-                },
-                {
-                  "key": "date",
-                  "value": "Sun, 25 Oct 2026 16:16:19 GMT"
-                },
-                {
-                  "key": "connection",
-                  "value": "keep-alive"
-                },
-                {
-                  "key": "keep-alive",
-                  "value": "timeout=5"
                 }
               ],
               "cookie": [],
               "body": "{\n  \"partidaId\": 3,\n  \"estado\": \"TERMINADA\",\n  \"motivo\": \"ABANDONO\",\n  \"ganador\": 7\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));"
+                ]
+              }
             }
           ]
         },
@@ -423,7 +315,7 @@
           },
           "response": [
             {
-              "name": "422 PARTIDA_NO_ACTIVA",
+              "name": "422 Unprocessable Entity",
               "originalRequest": {
                 "method": "POST",
                 "header": [
@@ -449,36 +341,23 @@
               "_postman_previewlanguage": "json",
               "header": [
                 {
-                  "key": "vary",
-                  "value": "Origin"
-                },
-                {
-                  "key": "access-control-allow-origin",
-                  "value": "http://localhost:5173"
-                },
-                {
-                  "key": "content-type",
+                  "key": "Content-Type",
                   "value": "application/json; charset=utf-8"
-                },
-                {
-                  "key": "content-length",
-                  "value": "150"
-                },
-                {
-                  "key": "date",
-                  "value": "Sun, 25 Oct 2026 16:18:21 GMT"
-                },
-                {
-                  "key": "connection",
-                  "value": "keep-alive"
-                },
-                {
-                  "key": "keep-alive",
-                  "value": "timeout=5"
                 }
               ],
               "cookie": [],
               "body": "{\n  \"codigo\": \"PARTIDA_NO_ACTIVA\",\n  \"mensaje\": \"Solo se puede abandonar una partida en despliegue o en curso. Para salir de un lobby usa DELETE /games/:id.\"\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('422 PARTIDA_NO_ACTIVA', () => { pm.response.to.have.status(422); pm.expect(pm.response.json().codigo).to.eql('PARTIDA_NO_ACTIVA'); });"
+                ]
+              }
             }
           ]
         }
@@ -543,36 +422,24 @@
               "_postman_previewlanguage": "json",
               "header": [
                 {
-                  "key": "vary",
-                  "value": "Origin"
-                },
-                {
-                  "key": "access-control-allow-origin",
-                  "value": "http://localhost:5173"
-                },
-                {
-                  "key": "content-type",
+                  "key": "Content-Type",
                   "value": "application/json; charset=utf-8"
-                },
-                {
-                  "key": "content-length",
-                  "value": "101"
-                },
-                {
-                  "key": "date",
-                  "value": "Sun, 25 Oct 2026 15:53:49 GMT"
-                },
-                {
-                  "key": "connection",
-                  "value": "keep-alive"
-                },
-                {
-                  "key": "keep-alive",
-                  "value": "timeout=5"
                 }
               ],
               "cookie": [],
               "body": "{\n  \"usuario\": {\n    \"id\": 10,\n    \"username\": \"admin_postman\",\n    \"email\": \"admin_postman@uc.cl\",\n    \"role\": \"Administrador\"\n  }\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('admin', pm.response.json().usuario.id);"
+                ]
+              }
             }
           ]
         },
@@ -626,36 +493,24 @@
               "_postman_previewlanguage": "json",
               "header": [
                 {
-                  "key": "vary",
-                  "value": "Origin"
-                },
-                {
-                  "key": "access-control-allow-origin",
-                  "value": "http://localhost:5173"
-                },
-                {
-                  "key": "content-type",
+                  "key": "Content-Type",
                   "value": "application/json; charset=utf-8"
-                },
-                {
-                  "key": "content-length",
-                  "value": "838"
-                },
-                {
-                  "key": "date",
-                  "value": "Sun, 25 Oct 2026 15:56:41 GMT"
-                },
-                {
-                  "key": "connection",
-                  "value": "keep-alive"
-                },
-                {
-                  "key": "keep-alive",
-                  "value": "timeout=5"
                 }
               ],
               "cookie": [],
-              "body": "[\n  {\n    \"eventoId\": 1,\n    \"partidaId\": 3,\n    \"ronda\": 1,\n    \"carta\": \"MAREA_ALTA\",\n    \"efecto\": \"Las corrientes peligrosas no hacen daño esta ronda.\",\n    \"createdAt\": \"2026-10-25T15:36:47.703Z\"\n  },\n  {\n    \"eventoId\": 2,\n    \"partidaId\": 3,\n    \"ronda\": 2,\n    \"carta\": \"SABOTAJE\",\n    \"efecto\": \"Un jugador elegido al azar pierde 1 de munición.\",\n    \"createdAt\": \"2026-10-25T15:36:47.703Z\"\n  },\n  {\n    \"eventoId\": 3,\n    \"partidaId\": 3,\n    \"ronda\": 3,\n    \"carta\": \"BOTIN_FLOTANTE\",\n    \"efecto\": \"Aparece un bono de 2 de combustible o munición en una casilla vacía al azar.\",\n    \"createdAt\": \"2026-10-25T15:36:47.703Z\"\n  },\n  {\n    \"eventoId\": 4,\n    \"partidaId\": 3,\n    \"ronda\": 4,\n    \"carta\": \"TORMENTA\",\n    \"efecto\": \"Radio de detección -1 para todos los barcos esta ronda.\",\n    \"createdAt\": \"2026-10-25T15:36:47.703Z\"\n  },\n  {\n    \"eventoId\": 5,\n    \"partidaId\": 3,\n    \"ronda\": 5,\n    \"carta\": \"SABOTAJE\",\n    \"efecto\": \"Un jugador elegido al azar pierde 1 de munición.\",\n    \"createdAt\": \"2026-10-25T15:42:52.227Z\"\n  }\n]"
+              "body": "[\n  {\n    \"eventoId\": 1,\n    \"partidaId\": 3,\n    \"ronda\": 1,\n    \"carta\": \"MAREA_ALTA\",\n    \"efecto\": \"Las corrientes peligrosas no hacen daño esta ronda.\",\n    \"createdAt\": \"2026-10-26T00:09:41.920Z\"\n  },\n  {\n    \"eventoId\": 2,\n    \"partidaId\": 3,\n    \"ronda\": 2,\n    \"carta\": \"SABOTAJE\",\n    \"efecto\": \"Un jugador elegido al azar pierde 1 de munición.\",\n    \"createdAt\": \"2026-10-26T00:09:41.920Z\"\n  },\n  {\n    \"eventoId\": 3,\n    \"partidaId\": 3,\n    \"ronda\": 3,\n    \"carta\": \"BOTIN_FLOTANTE\",\n    \"efecto\": \"Aparece un bono de 2 de combustible o munición en una casilla vacía al azar.\",\n    \"createdAt\": \"2026-10-26T00:09:41.920Z\"\n  },\n  {\n    \"eventoId\": 4,\n    \"partidaId\": 3,\n    \"ronda\": 4,\n    \"carta\": \"TORMENTA\",\n    \"efecto\": \"Radio de detección -1 para todos los barcos esta ronda.\",\n    \"createdAt\": \"2026-10-26T00:09:41.920Z\"\n  },\n  {\n    \"eventoId\": 5,\n    \"partidaId\": 3,\n    \"ronda\": 5,\n    \"carta\": \"TORMENTA\",\n    \"efecto\": \"Radio de detección -1 para todos los barcos esta ronda.\",\n    \"createdAt\": \"2026-10-26T00:09:43.785Z\"\n  }\n]"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('eventoId', pm.response.json()[0].eventoId);"
+                ]
+              }
             }
           ]
         },
@@ -711,36 +566,23 @@
               "_postman_previewlanguage": "json",
               "header": [
                 {
-                  "key": "vary",
-                  "value": "Origin"
-                },
-                {
-                  "key": "access-control-allow-origin",
-                  "value": "http://localhost:5173"
-                },
-                {
-                  "key": "content-type",
+                  "key": "Content-Type",
                   "value": "application/json; charset=utf-8"
-                },
-                {
-                  "key": "content-length",
-                  "value": "162"
-                },
-                {
-                  "key": "date",
-                  "value": "Sun, 25 Oct 2026 15:59:31 GMT"
-                },
-                {
-                  "key": "connection",
-                  "value": "keep-alive"
-                },
-                {
-                  "key": "keep-alive",
-                  "value": "timeout=5"
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"eventoId\": 1,\n  \"partidaId\": 3,\n  \"ronda\": 1,\n  \"carta\": \"MAREA_ALTA\",\n  \"efecto\": \"Las corrientes peligrosas no hacen daño esta ronda.\",\n  \"createdAt\": \"2026-10-25T15:36:47.703Z\"\n}"
+              "body": "{\n  \"eventoId\": 1,\n  \"partidaId\": 3,\n  \"ronda\": 1,\n  \"carta\": \"MAREA_ALTA\",\n  \"efecto\": \"Las corrientes peligrosas no hacen daño esta ronda.\",\n  \"createdAt\": \"2026-10-26T00:09:41.920Z\"\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));"
+                ]
+              }
             }
           ]
         },
@@ -812,36 +654,24 @@
               "_postman_previewlanguage": "json",
               "header": [
                 {
-                  "key": "vary",
-                  "value": "Origin"
-                },
-                {
-                  "key": "access-control-allow-origin",
-                  "value": "http://localhost:5173"
-                },
-                {
-                  "key": "content-type",
+                  "key": "Content-Type",
                   "value": "application/json; charset=utf-8"
-                },
-                {
-                  "key": "content-length",
-                  "value": "158"
-                },
-                {
-                  "key": "date",
-                  "value": "Sun, 25 Oct 2026 16:01:19 GMT"
-                },
-                {
-                  "key": "connection",
-                  "value": "keep-alive"
-                },
-                {
-                  "key": "keep-alive",
-                  "value": "timeout=5"
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"eventoId\": 6,\n  \"partidaId\": 3,\n  \"ronda\": 20,\n  \"carta\": \"SABOTAJE\",\n  \"efecto\": \"Un jugador elegido al azar pierde 1 de munición.\",\n  \"createdAt\": \"2026-10-25T16:01:19.252Z\"\n}"
+              "body": "{\n  \"eventoId\": 6,\n  \"partidaId\": 3,\n  \"ronda\": 20,\n  \"carta\": \"SABOTAJE\",\n  \"efecto\": \"Un jugador elegido al azar pierde 1 de munición.\",\n  \"createdAt\": \"2026-10-26T00:09:43.934Z\"\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('eventoId', pm.response.json().eventoId);"
+                ]
+              }
             }
           ]
         },
@@ -878,7 +708,7 @@
           },
           "response": [
             {
-              "name": "403 SOLO ADMIN",
+              "name": "403 Forbidden",
               "originalRequest": {
                 "method": "POST",
                 "header": [
@@ -913,36 +743,23 @@
               "_postman_previewlanguage": "json",
               "header": [
                 {
-                  "key": "vary",
-                  "value": "Origin"
-                },
-                {
-                  "key": "access-control-allow-origin",
-                  "value": "http://localhost:5173"
-                },
-                {
-                  "key": "content-type",
+                  "key": "Content-Type",
                   "value": "application/json; charset=utf-8"
-                },
-                {
-                  "key": "content-length",
-                  "value": "108"
-                },
-                {
-                  "key": "date",
-                  "value": "Sun, 25 Oct 2026 16:03:12 GMT"
-                },
-                {
-                  "key": "connection",
-                  "value": "keep-alive"
-                },
-                {
-                  "key": "keep-alive",
-                  "value": "timeout=5"
                 }
               ],
               "cookie": [],
               "body": "{\n  \"codigo\": \"SOLO_ADMINISTRADOR\",\n  \"mensaje\": \"Solo un administrador puede crear, modificar o eliminar eventos.\"\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403 SOLO_ADMINISTRADOR', () => { pm.response.to.have.status(403); pm.expect(pm.response.json().codigo).to.eql('SOLO_ADMINISTRADOR'); });"
+                ]
+              }
             }
           ]
         },
@@ -1016,36 +833,23 @@
               "_postman_previewlanguage": "json",
               "header": [
                 {
-                  "key": "vary",
-                  "value": "Origin"
-                },
-                {
-                  "key": "access-control-allow-origin",
-                  "value": "http://localhost:5173"
-                },
-                {
-                  "key": "content-type",
+                  "key": "Content-Type",
                   "value": "application/json; charset=utf-8"
-                },
-                {
-                  "key": "content-length",
-                  "value": "163"
-                },
-                {
-                  "key": "date",
-                  "value": "Sun, 25 Oct 2026 16:05:19 GMT"
-                },
-                {
-                  "key": "connection",
-                  "value": "keep-alive"
-                },
-                {
-                  "key": "keep-alive",
-                  "value": "timeout=5"
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"eventoId\": 6,\n  \"partidaId\": 3,\n  \"ronda\": 20,\n  \"carta\": \"MAREA_ALTA\",\n  \"efecto\": \"Las corrientes peligrosas no hacen daño esta ronda.\",\n  \"createdAt\": \"2026-10-25T16:01:19.252Z\"\n}"
+              "body": "{\n  \"eventoId\": 6,\n  \"partidaId\": 3,\n  \"ronda\": 20,\n  \"carta\": \"MAREA_ALTA\",\n  \"efecto\": \"Las corrientes peligrosas no hacen daño esta ronda.\",\n  \"createdAt\": \"2026-10-26T00:09:43.934Z\"\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));"
+                ]
+              }
             }
           ]
         },
@@ -1098,31 +902,26 @@
               },
               "status": "No Content",
               "code": 204,
-              "_postman_previewlanguage": "text",
+              "_postman_previewlanguage": "json",
               "header": [
                 {
-                  "key": "vary",
-                  "value": "Origin"
-                },
-                {
-                  "key": "access-control-allow-origin",
-                  "value": "http://localhost:5173"
-                },
-                {
-                  "key": "date",
-                  "value": "Sun, 25 Oct 2026 16:07:46 GMT"
-                },
-                {
-                  "key": "connection",
-                  "value": "keep-alive"
-                },
-                {
-                  "key": "keep-alive",
-                  "value": "timeout=5"
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
                 }
               ],
               "cookie": [],
               "body": ""
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 204', () => pm.response.to.have.status(204));"
+                ]
+              }
             }
           ]
         }

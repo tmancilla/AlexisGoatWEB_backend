@@ -53,7 +53,50 @@
         },
         "description": "Crea un usuario de prueba. Respuesta esperada: 201."
       },
-      "response": []
+      "response": [
+        {
+          "name": "201 Created",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"postman_{{$timestamp}}\",\n  \"email\": \"postman_{{$timestamp}}@example.com\",\n  \"password\": \"1234\",\n  \"role\": \"Jugador\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "description": "Crea un usuario de prueba. Respuesta esperada: 201."
+          },
+          "status": "Created",
+          "code": 201,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"id\": 10,\n  \"username\": \"postman_{{$timestamp}}\",\n  \"email\": \"postman_{{$timestamp}}@example.com\",\n  \"role\": \"Jugador\",\n  \"createdAt\": \"2026-10-26T00:08:55.171Z\",\n  \"updatedAt\": \"2026-10-26T00:08:55.171Z\"\n}"
+        }
+      ]
     },
     {
       "name": "2. Listar usuarios - 200",
@@ -71,7 +114,36 @@
         },
         "description": "Consulta el listado de usuarios. Respuesta esperada: 200."
       },
-      "response": []
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "description": "Consulta el listado de usuarios. Respuesta esperada: 200."
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "[\n  {\n    \"id\": 1,\n    \"username\": \"demo_dueno\",\n    \"email\": \"demo_dueno@demo.cl\",\n    \"role\": \"Jugador\",\n    \"createdAt\": \"2026-10-26T00:08:52.431Z\",\n    \"updatedAt\": \"2026-10-26T00:08:52.431Z\"\n  },\n  {\n    \"id\": 2,\n    \"username\": \"demo_libre1\",\n    \"email\": \"demo_libre1@demo.cl\",\n    \"role\": \"Jugador\",\n    \"createdAt\": \"2026-10-26T00:08:52.431Z\",\n    \"updatedAt\": \"2026-10-26T00:08:52.431Z\"\n  },\n  {\n    \"id\": 3,\n    \"username\": \"demo_libre2\",\n    \"email\": \"demo_libre2@demo.cl\",\n    \"role\": \"Jugador\",\n    \"createdAt\": \"2026-10-26T00:08:52.431Z\",\n    \"updatedAt\": \"2026-10-26T00:08:52.431Z\"\n  },\n  {\n    \"id\": 4,\n    \"username\": \"demo_ana\",\n    \"email\": \"demo_ana@demo.cl\",\n    \"role\": \"Jugador\",\n    \"createdAt\": \"2026-10-26T00:08:52.431Z\",\n    \"updatedAt\": \"2026-10-26T00:08:52.431Z\"\n  },\n  {\n    \"id\": 5,\n    \"username\": \"demo_beto\",\n    \"email\": \"demo_beto@demo.cl\",\n    \"role\": \"Jugador\",\n    \"createdAt\": \"2026-10-26T00:08:52.431Z\",\n    \"updatedAt\": \"2026-10-26T00:08:52.431Z\"\n  },\n  {\n    \"id\": 6,\n    \"username\": \"demo_karla\",\n    \"email\": \"demo_karla@demo.cl\",\n    \"role\": \"Jugador\",\n    \"createdAt\": \"2026-10-26T00:08:52.431Z\",\n    \"updatedAt\": \"2026-10-26T00:08:52.431Z\"\n  },\n  {\n    \"id\": 7,\n    \"username\": \"demo_diego\",\n    \"email\": \"demo_diego@demo.cl\",\n    \"role\": \"Jugador\",\n    \"createdAt\": \"2026-10-26T00:08:52.431Z\",\n    \"updatedAt\": \"2026-10-26T00:08:52.431Z\"\n  },\n  {\n    \"id\": 8,\n    \"username\": \"demo_elena\",\n    \"email\": \"demo_elena@demo.cl\",\n    \"role\": \"Jugador\",\n    \"createdAt\": \"2026-10-26T00:08:52.431Z\",\n    \"updatedAt\": \"2026-10-26T00:08:52.431Z\"\n  },\n  {\n    \"id\": 9,\n    \"username\": \"demo_fede\",\n    \"email\": \"demo_fede@demo.cl\",\n    \"role\": \"Jugador\",\n    \"createdAt\": \"2026-10-26T00:08:52.431Z\",\n    \"updatedAt\": \"2026-10-26T00:08:52.431Z\"\n  },\n  {\n    \"id\": 10,\n    \"username\": \"postman_{{$timestamp}}\",\n    \"email\": \"postman_{{$timestamp}}@example.com\",\n    \"role\": \"Jugador\",\n    \"createdAt\": \"2026-10-26T00:08:55.171Z\",\n    \"updatedAt\": \"2026-10-26T00:08:55.171Z\"\n  }\n]"
+        }
+      ]
     },
     {
       "name": "3. Consultar usuario - 200",
@@ -90,7 +162,37 @@
         },
         "description": "Consulta el usuario creado en la primera peticion. Respuesta esperada: 200."
       },
-      "response": []
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{usuarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{usuarioId}}"
+              ]
+            },
+            "description": "Consulta el usuario creado en la primera peticion. Respuesta esperada: 200."
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"id\": 10,\n  \"username\": \"postman_{{$timestamp}}\",\n  \"email\": \"postman_{{$timestamp}}@example.com\",\n  \"role\": \"Jugador\",\n  \"createdAt\": \"2026-10-26T00:08:55.171Z\",\n  \"updatedAt\": \"2026-10-26T00:08:55.171Z\"\n}"
+        }
+      ]
     },
     {
       "name": "4. Actualizar usuario - 200",
@@ -123,7 +225,51 @@
         },
         "description": "Actualiza el correo y conserva los otros campos. Respuesta esperada: 200."
       },
-      "response": []
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"actualizado_{{$timestamp}}@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{usuarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{usuarioId}}"
+              ]
+            },
+            "description": "Actualiza el correo y conserva los otros campos. Respuesta esperada: 200."
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"id\": 10,\n  \"username\": \"postman_{{$timestamp}}\",\n  \"email\": \"actualizado_{{$timestamp}}@example.com\",\n  \"role\": \"Jugador\",\n  \"createdAt\": \"2026-10-26T00:08:55.171Z\",\n  \"updatedAt\": \"2026-10-26T00:08:55.357Z\"\n}"
+        }
+      ]
     },
     {
       "name": "5. Iniciar sesion - 200",
@@ -156,7 +302,51 @@
         },
         "description": "Inicia sesion con el usuario de prueba. Respuesta esperada: 200 con el objeto usuario."
       },
-      "response": []
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"1234\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Inicia sesion con el usuario de prueba. Respuesta esperada: 200 con el objeto usuario."
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"usuario\": {\n    \"id\": 10,\n    \"username\": \"postman_{{$timestamp}}\",\n    \"email\": \"actualizado_{{$timestamp}}@example.com\",\n    \"role\": \"Jugador\"\n  }\n}"
+        }
+      ]
     },
     {
       "name": "6. Registrar cuenta - 201",
@@ -189,7 +379,51 @@
         },
         "description": "Registra una segunda cuenta, que queda guardada para probar el login desde el frontend. Respuesta esperada: 201 con el objeto usuario."
       },
-      "response": []
+      "response": [
+        {
+          "name": "201 Created",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"registro_{{$timestamp}}\",\n  \"email\": \"registro_{{$timestamp}}@example.com\",\n  \"password\": \"1234\",\n  \"role\": \"Jugador\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Registra una segunda cuenta, que queda guardada para probar el login desde el frontend. Respuesta esperada: 201 con el objeto usuario."
+          },
+          "status": "Created",
+          "code": 201,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"usuario\": {\n    \"id\": 11,\n    \"username\": \"registro_{{$timestamp}}\",\n    \"email\": \"registro_{{$timestamp}}@example.com\",\n    \"role\": \"Jugador\"\n  }\n}"
+        }
+      ]
     },
     {
       "name": "7. Eliminar usuario - 204",
@@ -208,7 +442,37 @@
         },
         "description": "Elimina exclusivamente el usuario creado en la primera peticion. Respuesta esperada: 204 sin cuerpo."
       },
-      "response": []
+      "response": [
+        {
+          "name": "204 No Content",
+          "originalRequest": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{usuarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{usuarioId}}"
+              ]
+            },
+            "description": "Elimina exclusivamente el usuario creado en la primera peticion. Respuesta esperada: 204 sin cuerpo."
+          },
+          "status": "No Content",
+          "code": 204,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": ""
+        }
+      ]
     }
   ],
   "variable": [

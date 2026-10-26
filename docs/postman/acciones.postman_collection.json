@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "9fa87bbb-8f11-4b3e-b3c4-87cd497206d9",
     "name": "Guerra del Pacifico - Acciones",
-    "description": "Consulta y mantenimiento del historial propio de acciones. Configurar usuarioId, partidaId y accionId con registros existentes. Para actualizar o eliminar, la partida debe estar TERMINADA. Estos cambios afectan al historial y no revierten movimientos ni recursos.",
+    "description": "Consulta y mantenimiento del historial propio de acciones.\n\nAntes de usarla: recrear la base con los datos de prueba (npm run db:reset). Por defecto usa la partida terminada del seeder (partida 4) con demo_elena (id 8), que tiene acciones guardadas; accionId se guarda solo al listar.\n\nPara actualizar o eliminar, la partida debe estar TERMINADA. Estos cambios afectan solo al historial y no revierten movimientos ni recursos.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "53043357",
     "_collection_link": "https://go.postman.co/collection/53043357-9fa87bbb-8f11-4b3e-b3c4-87cd497206d9?source=collection_link"
@@ -31,7 +31,55 @@
         },
         "description": "Lista las acciones del usuario identificado dentro de la partida."
       },
-      "response": []
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{usuarioId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaId}}/acciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaId}}",
+                "acciones"
+              ]
+            },
+            "description": "Lista las acciones del usuario identificado dentro de la partida."
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "[\n  {\n    \"id\": 5,\n    \"jugadorPartidaId\": 6,\n    \"barcoId\": 4,\n    \"tipo\": \"DISPARAR\",\n    \"ronda\": 9,\n    \"resultado\": {\n      \"costos\": {\n        \"acciones\": 1,\n        \"municion\": 2\n      },\n      \"hundido\": true,\n      \"impacto\": true,\n      \"cascoRestante\": 0,\n      \"casillaObjetivo\": {\n        \"x\": 6,\n        \"y\": 9\n      }\n    },\n    \"createdAt\": \"2026-10-26T00:09:25.350Z\",\n    \"updatedAt\": \"2026-10-26T00:09:25.350Z\"\n  },\n  {\n    \"id\": 6,\n    \"jugadorPartidaId\": 6,\n    \"barcoId\": 3,\n    \"tipo\": \"MOVER\",\n    \"ronda\": 19,\n    \"resultado\": {\n      \"costos\": {\n        \"acciones\": 1,\n        \"combustible\": 2\n      },\n      \"detenidoPor\": \"DESTINO_ALCANZADO\",\n      \"casillaFinal\": {\n        \"x\": 7,\n        \"y\": 7\n      },\n      \"casillaDestino\": {\n        \"x\": 7,\n        \"y\": 7\n      },\n      \"casillasRecorridas\": 1\n    },\n    \"createdAt\": \"2026-10-26T00:09:25.350Z\",\n    \"updatedAt\": \"2026-10-26T00:09:25.350Z\"\n  },\n  {\n    \"id\": 7,\n    \"jugadorPartidaId\": 6,\n    \"barcoId\": 2,\n    \"tipo\": \"MOVER\",\n    \"ronda\": 20,\n    \"resultado\": {\n      \"costos\": {\n        \"acciones\": 1,\n        \"combustible\": 2\n      },\n      \"detenidoPor\": \"DESTINO_ALCANZADO\",\n      \"casillaFinal\": {\n        \"x\": 6,\n        \"y\": 7\n      },\n      \"casillaDestino\": {\n        \"x\": 6,\n        \"y\": 7\n      },\n      \"casillasRecorridas\": 2\n    },\n    \"createdAt\": \"2026-10-26T00:09:25.350Z\",\n    \"updatedAt\": \"2026-10-26T00:09:25.350Z\"\n  }\n]"
+        }
+      ],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('responde 200', () => pm.response.to.have.status(200));",
+              "pm.collectionVariables.set('accionId', pm.response.json()[0].id);"
+            ]
+          }
+        }
+      ]
     },
     {
       "name": "2. Consultar accion propia - 200",
@@ -57,7 +105,55 @@
         },
         "description": "Consulta una accion existente del usuario identificado dentro de la partida."
       },
-      "response": []
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{usuarioId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaId}}/acciones/{{accionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaId}}",
+                "acciones",
+                "{{accionId}}"
+              ]
+            },
+            "description": "Consulta una accion existente del usuario identificado dentro de la partida."
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"id\": 5,\n  \"jugadorPartidaId\": 6,\n  \"barcoId\": 4,\n  \"tipo\": \"DISPARAR\",\n  \"ronda\": 9,\n  \"resultado\": {\n    \"costos\": {\n      \"acciones\": 1,\n      \"municion\": 2\n    },\n    \"hundido\": true,\n    \"impacto\": true,\n    \"cascoRestante\": 0,\n    \"casillaObjetivo\": {\n      \"x\": 6,\n      \"y\": 9\n    }\n  },\n  \"createdAt\": \"2026-10-26T00:09:25.350Z\",\n  \"updatedAt\": \"2026-10-26T00:09:25.350Z\"\n}"
+        }
+      ],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('responde 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
     },
     {
       "name": "3. Actualizar accion propia - 200",
@@ -96,7 +192,69 @@
         },
         "description": "Actualiza la ronda del registro. La partida debe estar TERMINADA. Tambien se permite actualizar tipo y resultado. Si la partida no esta terminada, devuelve 409 ACCION_NO_EDITABLE."
       },
-      "response": []
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{usuarioId}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ronda\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaId}}/acciones/{{accionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaId}}",
+                "acciones",
+                "{{accionId}}"
+              ]
+            },
+            "description": "Actualiza la ronda del registro. La partida debe estar TERMINADA. Tambien se permite actualizar tipo y resultado. Si la partida no esta terminada, devuelve 409 ACCION_NO_EDITABLE."
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"id\": 5,\n  \"jugadorPartidaId\": 6,\n  \"barcoId\": 4,\n  \"tipo\": \"DISPARAR\",\n  \"ronda\": 2,\n  \"resultado\": {\n    \"costos\": {\n      \"acciones\": 1,\n      \"municion\": 2\n    },\n    \"hundido\": true,\n    \"impacto\": true,\n    \"cascoRestante\": 0,\n    \"casillaObjetivo\": {\n      \"x\": 6,\n      \"y\": 9\n    }\n  },\n  \"createdAt\": \"2026-10-26T00:09:25.350Z\",\n  \"updatedAt\": \"2026-10-26T00:09:26.974Z\"\n}"
+        }
+      ],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('responde 200', () => pm.response.to.have.status(200));",
+              "pm.test('cambia la ronda', () => pm.expect(pm.response.json().ronda).to.eql(2));"
+            ]
+          }
+        }
+      ]
     },
     {
       "name": "4. Eliminar accion propia - 204",
@@ -122,7 +280,55 @@
         },
         "description": "Elimina el registro propio del historial. La partida debe estar TERMINADA. Devuelve 204 sin cuerpo. Si la partida no esta terminada, devuelve 409 ACCION_NO_EDITABLE."
       },
-      "response": []
+      "response": [
+        {
+          "name": "204 No Content",
+          "originalRequest": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-Usuario-Id",
+                "value": "{{usuarioId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/games/{{partidaId}}/acciones/{{accionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "games",
+                "{{partidaId}}",
+                "acciones",
+                "{{accionId}}"
+              ]
+            },
+            "description": "Elimina el registro propio del historial. La partida debe estar TERMINADA. Devuelve 204 sin cuerpo. Si la partida no esta terminada, devuelve 409 ACCION_NO_EDITABLE."
+          },
+          "status": "No Content",
+          "code": 204,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": ""
+        }
+      ],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('responde 204', () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ]
     }
   ],
   "variable": [
@@ -132,11 +338,11 @@
     },
     {
       "key": "usuarioId",
-      "value": ""
+      "value": "8"
     },
     {
       "key": "partidaId",
-      "value": ""
+      "value": "4"
     },
     {
       "key": "accionId",

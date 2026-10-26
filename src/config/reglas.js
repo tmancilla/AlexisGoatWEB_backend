@@ -36,6 +36,8 @@ const CHATARRA_NAUFRAGIO = 3;
 
 const CHATARRA_HUNDIMIENTO = 2;
 
+const TIPOS_COMBATE = ['DISTANCIA', 'CUERPO_A_CUERPO'];
+
 const ACCIONES_POR_TURNO = 3;
 
 // regla 8, lo que entrega cada casilla de recurso ocupada al inicio del turno
@@ -78,6 +80,7 @@ module.exports = {
   TIPOS_ACCION,
   CHATARRA_NAUFRAGIO,
   CHATARRA_HUNDIMIENTO,
+  TIPOS_COMBATE,
   ACCIONES_POR_TURNO,
   RECOLECCION,
   COMBUSTIBLE_RESERVA,

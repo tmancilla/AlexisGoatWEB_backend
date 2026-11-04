@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const { Usuario } = require('../models');
 const usuarioService = require('./usuario.service');
 const HttpError = require('../utils/HttpError');
@@ -48,7 +49,10 @@ async function iniciarSesion(datos) {
     },
   });
 
-  if (!usuario || usuario.password !== datos.password) {
+  if (
+    !usuario ||
+    !(await bcrypt.compare(datos.password, usuario.password))
+  ) {
     throw new HttpError(
       401,
       'CREDENCIALES_INVALIDAS',

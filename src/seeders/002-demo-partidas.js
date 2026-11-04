@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const { BARCOS, CARTAS_EVENTO } = require('../config/reglas');
 
 const USUARIOS = [
@@ -38,7 +39,7 @@ module.exports = {
       USUARIOS.map((username) => ({
         username,
         email: `${username}@demo.cl`,
-        password: '123456',
+        password: bcrypt.hashSync('123456', 10),
         role: 'Jugador',
         createdAt: ahora,
         updatedAt: ahora,

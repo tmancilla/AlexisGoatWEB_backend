@@ -1,3 +1,5 @@
+const bcrypt = require('bcrypt');
+
 module.exports = (sequelize, DataTypes) => {
   const Usuario = sequelize.define(
     'Usuario',
@@ -40,6 +42,18 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       tableName: 'Usuarios',
+
+      hooks: {
+        beforeCreate: async (usuario) => {
+          usuario.password = await bcrypt.hash(usuario.password, 10);
+        },
+
+        beforeUpdate: async (usuario) => {
+          if (usuario.changed('password')) {
+            usuario.password = await bcrypt.hash(usuario.password, 10);
+          }
+        },
+      },
     }
   );
 
@@ -50,6 +64,7 @@ module.exports = (sequelize, DataTypes) => {
       otherKey: 'partidaId',
       as: 'partidas',
     });
+
     Usuario.hasMany(models.JugadorPartida, {
       foreignKey: 'usuarioId',
       as: { singular: 'participacion', plural: 'participaciones' },

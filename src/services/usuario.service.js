@@ -30,6 +30,20 @@ async function obtenerUsuario(id) {
 }
 
 async function crearUsuario(datos) {
+  if (
+    datos.role === 'Administrador' &&
+    (
+      !process.env.CODIGO_ADMIN ||
+      datos.codigoAdmin !== process.env.CODIGO_ADMIN
+    )
+  ) {
+    throw new HttpError(
+      403,
+      'CODIGO_ADMIN_INVALIDO',
+      'El código de administrador es incorrecto.'
+    );
+  }
+
   const usuario = await Usuario.create({
     username: datos.username,
     email: datos.email,

@@ -1,4 +1,5 @@
 const authService = require('../services/auth.service');
+const { firmarToken } = require('../utils/token');
 
 function usuarioPublico(usuario) {
   return {
@@ -15,6 +16,7 @@ async function registrarUsuario(ctx) {
 
   ctx.status = 201;
   ctx.body = {
+    token: firmarToken(usuario),
     usuario: usuarioPublico(usuario),
   };
 }
@@ -25,6 +27,7 @@ async function iniciarSesion(ctx) {
 
   ctx.status = 200;
   ctx.body = {
+    token: firmarToken(usuario),
     usuario: usuarioPublico(usuario),
   };
 }

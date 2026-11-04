@@ -1,7 +1,7 @@
 const request = require('supertest');
 const app = require('../src/app');
 const { Usuario, JugadorPartida, Barco, Casilla, Accion, sequelize } = require('../src/models');
-const { BARCOS, CANTIDAD_BOTIN } = require('../src/config/reglas');
+const { BARCOS, CANTIDAD_BOTIN, CHATARRA_HUNDIMIENTO } = require('../src/config/reglas');
 const tokenDe = require('./helpers/tokenDe');
 
 const api = request(app.callback());
@@ -33,6 +33,9 @@ beforeAll(async () => {
   karla = await participante('demo_karla');
   diego = await participante('demo_diego');
   partidaId = karla.jugador.partidaId;
+
+  await karla.jugador.partida.update({ turnoActualId: karla.jugador.id });
+  await karla.jugador.update({ accionesRestantes: 3 });
 });
 
 afterAll(async () => {
@@ -65,17 +68,17 @@ describe('Acciones de la partida', () => {
   });
 
   test('pasar por un botín flotante entrega el recurso una sola vez', async () => {
-    const fragata = await Barco.findOne({
-      where: { jugadorPartidaId: karla.jugador.id, tipo: 'FRAGATA' },
+    const acorazado = await Barco.findOne({
+      where: { jugadorPartidaId: karla.jugador.id, tipo: 'ACORAZADO' },
     });
-    const destino = { x: fragata.x, y: fragata.y + 1 };
+    const destino = { x: acorazado.x + 1, y: acorazado.y };
     const casilla = await Casilla.findOne({
       where: { partidaId, x: destino.x, y: destino.y },
     });
     await casilla.update({ tipo: 'BOTIN_MUNICION', agotada: false });
     const municionAntes = karla.jugador.municion;
 
-    const respuesta = await moverBarco(karla.usuario, fragata, destino);
+    const respuesta = await moverBarco(karla.usuario, acorazado, destino);
 
     expect(respuesta.status).toBe(200);
     expect(respuesta.body.resultado.municionRecogida).toBe(CANTIDAD_BOTIN);
@@ -85,6 +88,32 @@ describe('Acciones de la partida', () => {
 
     expect(karla.jugador.municion).toBe(municionAntes + CANTIDAD_BOTIN);
     expect(casilla.agotada).toBe(true);
+  });
+
+  test('un barco que se hunde en una corriente deja su chatarra en esa casilla', async () => {
+    const fragata = await Barco.findOne({
+      where: { jugadorPartidaId: karla.jugador.id, tipo: 'FRAGATA' },
+    });
+    await fragata.update({ cascoActual: 1 });
+    const corrientes = await Casilla.findAll({
+      where: { partidaId, tipo: 'CORRIENTE_PELIGROSA' },
+    });
+    const corriente = corrientes.find((casilla) =>
+      Math.abs(casilla.x - fragata.x) + Math.abs(casilla.y - fragata.y) === 1);
+
+    const respuesta = await moverBarco(karla.usuario, fragata, { x: corriente.x, y: corriente.y });
+
+    expect(respuesta.status).toBe(200);
+    expect(respuesta.body.resultado).toEqual(expect.objectContaining({
+      detenidoPor: 'CORRIENTE_PELIGROSA',
+      hundido: true,
+    }));
+
+    await fragata.reload();
+    await corriente.reload();
+
+    expect(fragata.aFlote).toBe(false);
+    expect(corriente.chatarra).toBe(CHATARRA_HUNDIMIENTO);
   });
 
   test('una jugada fuera de turno responde 422 y no cambia el tablero ni los recursos', async () => {

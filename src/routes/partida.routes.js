@@ -5,13 +5,13 @@ const accionController = require('../controllers/accion.controller');
 const turnoController = require('../controllers/turno.controller');
 const eventoController = require('../controllers/evento.controller');
 const combateController = require('../controllers/combate.controller');
-const usuarioActual = require('../middlewares/usuarioActual');
+const autenticar = require('../middlewares/autenticar');
 
 const router = new Router({
   prefix: '/games',
 });
 
-router.use(usuarioActual);
+router.use(autenticar);
 
 router.get('/', partidaController.listarPartidas);
 router.post('/', partidaController.crearPartida);

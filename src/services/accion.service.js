@@ -7,11 +7,7 @@ const {
   BARCOS,
   TIPOS_ACCION,
   MAX_ACCIONES_POR_BARCO,
-  CHATARRA_NAUFRAGIO,
-  CHATARRA_HUNDIMIENTO} = require('../config/reglas');
-
-const ACCIONES_DISPONIBLES = ['MOVER'];
-const CHATARRA_POR_CASILLA = { NAUFRAGIO: CHATARRA_NAUFRAGIO, CHATARRA: CHATARRA_HUNDIMIENTO };
+  RECOGIBLES} = require('../config/reglas');
 
 function jugadaInvalida(codigo, mensaje) {
   return new HttpError(422, codigo, mensaje);
@@ -21,11 +17,22 @@ function validarCuerpo(datos) {
   if (!TIPOS_ACCION.includes(datos.tipoAccion)) {
     throw new HttpError(400, 'TIPO_ACCION_INVALIDO', `tipoAccion debe ser uno de: ${TIPOS_ACCION.join(', ')}.`);
   }
-  if (!ACCIONES_DISPONIBLES.includes(datos.tipoAccion)) {
-    throw jugadaInvalida('ACCION_NO_DISPONIBLE', `Por ahora solo se puede usar: ${ACCIONES_DISPONIBLES.join(', ')}.`);
+  const disponibles = Object.keys(ACCIONES);
+  if (!disponibles.includes(datos.tipoAccion)) {
+    throw jugadaInvalida('ACCION_NO_DISPONIBLE', `Por ahora solo se puede usar: ${disponibles.join(', ')}.`);
   }
-  if (datos.barcoId === undefined || !datos.casillaDestino) {
-    throw new HttpError(400, 'CAMPOS_FALTANTES', 'Para mover debes enviar barcoId y casillaDestino.');
+  if (datos.barcoId === undefined) {
+    throw new HttpError(400, 'CAMPOS_FALTANTES', 'Debes enviar el barcoId del barco que hace la accion.');
+  }
+  ACCIONES[datos.tipoAccion].validar(datos);
+}
+
+function validarMover(datos) {
+  if (!datos.casillaDestino) {
+    throw new HttpError(400, 'CAMPOS_FALTANTES', 'Para mover debes enviar casillaDestino.');
+  }
+  if (!dentroDelTablero(datos.casillaDestino)) {
+    throw new HttpError(400, 'FUERA_DEL_TABLERO', 'La casilla de destino debe tener x e y enteros entre 1 y 10.');
   }
 }
 
@@ -36,15 +43,13 @@ async function barcosAFlote(partidaId, transaction) {
     transaction});
 }
 
-async function mover(partida, jugador, barco, destino, transaction) {
+async function mover(partida, jugador, barco, datos, transaction) {
+  const destino = datos.casillaDestino;
   const costoPorCasilla = BARCOS[barco.tipo].combustiblePorCasilla;
   if (jugador.combustible < costoPorCasilla) {
     throw jugadaInvalida('COMBUSTIBLE_INSUFICIENTE', `Necesitas al menos ${costoPorCasilla} de combustible para mover este barco y tienes ${jugador.combustible}.`);
   }
 
-  if (!dentroDelTablero(destino)) {
-    throw new HttpError(400, 'FUERA_DEL_TABLERO', 'La casilla de destino debe tener x e y enteros entre 1 y 10.');
-  }
   const pasos = distancia(barco, destino);
   if (pasos === 0) {
     throw jugadaInvalida('DESTINO_INVALIDO', 'El destino debe ser distinto de la casilla donde esta el barco.');
@@ -81,7 +86,7 @@ async function mover(partida, jugador, barco, destino, transaction) {
   let recorridas = 0;
   let detenidoPor = 'DESTINO_ALCANZADO';
   let dano = 0;
-  let chatarra = 0;
+  const recogidos = { chatarra: 0, combustible: 0, municion: 0 };
 
   for (const paso of ruta) {
     if (posicionesEnemigas.has(clave(paso))) {
@@ -92,8 +97,9 @@ async function mover(partida, jugador, barco, destino, transaction) {
     recorridas += 1;
 
     const casilla = casillas.get(clave(paso));
-    if (CHATARRA_POR_CASILLA[casilla.tipo] && !casilla.agotada) {
-      chatarra += CHATARRA_POR_CASILLA[casilla.tipo];
+    const recogible = RECOGIBLES[casilla.tipo];
+    if (recogible && !casilla.agotada) {
+      recogidos[recogible.recurso] += recogible.cantidad;
       await casilla.update({ agotada: true }, { transaction });
     }
     if (casilla.tipo === 'CORRIENTE_PELIGROSA') {
@@ -112,14 +118,17 @@ async function mover(partida, jugador, barco, destino, transaction) {
   const combustible = recorridas * costoPorCasilla;
   await barco.update({ x: posicion.x, y: posicion.y, cascoActual, aFlote: !hundido }, { transaction });
   await jugador.update({
-    combustible: jugador.combustible - combustible,
-    chatarra: jugador.chatarra + chatarra,
+    combustible: jugador.combustible - combustible + recogidos.combustible,
+    municion: jugador.municion + recogidos.municion,
+    chatarra: jugador.chatarra + recogidos.chatarra,
     accionesRestantes: jugador.accionesRestantes - 1}, { transaction });
 
   const resultado = { casillaFinal: posicion, casillasRecorridas: recorridas, detenidoPor };
   if (dano) resultado.dano = dano;
   if (hundido) resultado.hundido = true;
-  if (chatarra) resultado.chatarraRecogida = chatarra;
+  if (recogidos.chatarra) resultado.chatarraRecogida = recogidos.chatarra;
+  if (recogidos.combustible) resultado.combustibleRecogido = recogidos.combustible;
+  if (recogidos.municion) resultado.municionRecogida = recogidos.municion;
   const costos = { combustible, acciones: 1 };
 
   await Accion.create({
@@ -131,6 +140,9 @@ async function mover(partida, jugador, barco, destino, transaction) {
 
   return { tipoAccion: 'MOVER', barcoId: barco.id, resultado, costos, accionesRestantes: jugador.accionesRestantes };
 }
+
+const ACCIONES = {
+  MOVER: { validar: validarMover, ejecutar: mover }};
 
 async function realizarAccion(id, usuario, datos) {
   const partidaId = validarId(id);
@@ -175,7 +187,7 @@ async function realizarAccion(id, usuario, datos) {
       throw jugadaInvalida('LIMITE_ACCIONES_BARCO', `Ese barco ya uso sus ${MAX_ACCIONES_POR_BARCO} acciones de este turno.`);
     }
 
-    return mover(partida, jugador, barco, datos.casillaDestino, transaction);
+    return ACCIONES[datos.tipoAccion].ejecutar(partida, jugador, barco, datos, transaction);
   });
 }
 

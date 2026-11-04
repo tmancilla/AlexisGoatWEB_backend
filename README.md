@@ -21,7 +21,21 @@ npm install
 cp .env.example .env
 ```
 
-Completar `DB_USER` y `DB_PASSWORD` en `.env`. El archivo `.env` no se sube al repositorio.
+Completar `DB_USER`, `DB_PASSWORD`, `CODIGO_ADMIN` y `JWT_SECRET` en `.env`. Mantener las demás variables según `.env.example`, incluyendo:
+
+```env
+JWT_EXPIRA=8h
+```
+
+Para generar `JWT_SECRET`:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+Copiar el resultado en `JWT_SECRET` del `.env` local.
+
+El archivo `.env` no se sube al repositorio. En `.env.example`, `JWT_SECRET` y `CODIGO_ADMIN` quedan vacíos.
 
 ### Base de datos
 
@@ -53,33 +67,65 @@ El servidor queda en `http://localhost:3000`. Para verificar que funciona y que 
 curl http://localhost:3000/health
 ```
 
-## Usuarios y autenticación básica — Entrega 3
+## Actualizar una instalación existente
+
+Después de incorporar cambios de `develop`, ejecutar desde el backend:
+
+```bash
+git switch develop
+git pull --ff-only
+npm install
+npm run db:migrate
+```
+
+Las dependencias y sus versiones se mantienen en `package.json` y `package-lock.json`. `npm install` instala lo necesario; no hay que instalar cada biblioteca por separado.
+
+Si ya existe un `.env`, conservar sus valores y completar las variables nuevas según `.env.example`.
+
+La migración `014-hash-usuarios-existentes` convierte las contraseñas antiguas a bcrypt y conserva las que ya estaban protegidas. Los usuarios siguen entrando con sus mismas contraseñas.
+
+## Usuarios y autenticación — Entregas 3 y 4
 
 Los usuarios se almacenan en PostgreSQL mediante el modelo Usuario.
 Se implementaron las siguientes rutas:
 
-| Método | Ruta | Función |
-|---|---|---|
-| POST | /users | Crear usuario |
-| GET | /users | Listar usuarios |
-| GET | /users/:id | Consultar usuario |
-| PATCH | /users/:id | Actualizar usuario |
-| DELETE | /users/:id | Eliminar usuario |
-| POST | /auth/register | Registrar usuario |
-| POST | /auth/login | Iniciar sesión |
+| Método | Ruta | Función | Acceso |
+|---|---|---|---|
+| POST | /users | Crear usuario | Público; crear administradores exige `codigoAdmin` válido |
+| GET | /users | Listar usuarios | Administrador autenticado |
+| GET | /users/:id | Consultar usuario | El propio usuario autenticado o un administrador |
+| PATCH | /users/:id | Actualizar usuario | El propio usuario autenticado o un administrador; modificar `role` exige ser administrador |
+| DELETE | /users/:id | Eliminar usuario | Administrador autenticado |
+| POST | /auth/register | Registrar usuario | Público; registrar administradores exige `codigoAdmin` válido |
+| POST | /auth/login | Iniciar sesión | Público, con credenciales válidas |
 
 Para registrar un administrador, se debe enviar `role: "Administrador"`
 y `codigoAdmin`. El servidor compara el código recibido con la variable
-`CODIGO_ADMIN` del `.env`, que en `.env.example` viene como `admin` para
-desarrollo (en producción se debe cambiar por un valor propio).
+`CODIGO_ADMIN` del `.env`.
+
+La validación se aplica tanto a `/auth/register` como a `/users`.
+Si el código falta o es incorrecto, responde `403 CODIGO_ADMIN_INVALIDO`.
+
+Un jugador no puede enviar el campo `role` al editar su usuario.
+
+### Contraseñas con bcrypt
+
+Se utiliza bcrypt con un factor de trabajo de 10.
+
+El modelo `Usuario` aplica el hash mediante `beforeCreate` y `beforeUpdate`.
+Al crear usuarios mediante el modelo o modificar su contraseña, se entrega
+la contraseña original: el modelo realiza el hash.
+
+Los seeders usan `bulkInsert`, por lo que aplican bcrypt directamente.
+Los usuarios demo siguen entrando con `123456`.
 
 ### Ajustes al protocolo de E2
 
-Para E3 se implementó autenticación básica. Registro y login devuelven
-el usuario, sin token:
+Registro y login devuelven el token y los datos públicos del usuario:
 
 ```json
 {
+  "token": "<token_jwt>",
   "usuario": {
     "id": 2,
     "username": "jugador_auth",
@@ -89,8 +135,8 @@ el usuario, sin token:
 }
 ```
 
-El hashing de contraseñas y la autenticación con JWT quedan para E4.
-Las respuestas no incluyen la contraseña.
+El registro responde `201` y el login correcto `200`.
+Las respuestas no incluyen la contraseña ni su hash.
 
 Los errores de validación y duplicados usan el middleware general:
 `VALIDACION_FALLIDA` (400) y `REGISTRO_DUPLICADO` (409).
@@ -104,15 +150,62 @@ actualización y eliminación de usuarios; los errores por usuario
 inexistente, correo inválido e ID inválido; y el registro y login con
 credenciales correctas e incorrectas.
 
-### Identificación del usuario (ajuste temporal al protocolo)
+### Identificación del usuario con JWT
 
-En esta entrega no hay JWT, así que los endpoints de `/games` identifican al usuario con el header `X-Usuario-Id`, en lugar de `Authorization: Bearer <token>`. El valor es el `id` que devuelven `POST /auth/register` y `POST /auth/login`.
+Las rutas protegidas reciben el token mediante:
 
-Si el header falta, no es un número entero positivo o corresponde a un usuario inexistente, el servidor responde `401 USUARIO_NO_IDENTIFICADO`. En la Entrega 4 se reemplazará por el token JWT, cambiando solo el middleware `usuarioActual`.
+```http
+Authorization: Bearer <token>
+```
+
+Se mantienen los siguientes formatos compartidos:
+
+- Registro y login responden `{ token, usuario }`.
+- El payload del token utiliza `{ id, rol }`, además de las fechas agregadas por la biblioteca.
+- El modelo `Usuario` y los datos públicos del usuario utilizan el campo `role`.
+- `src/utils/token.js` exporta `firmarToken(usuario)` y `verificarToken(token)`.
+- El middleware `autenticar` carga al usuario de la base en `ctx.state.user` y `ctx.state.usuario`.
+
+`X-Usuario-Id` ya no autentica las peticiones.
+
+Para obtener un token con un usuario demo de una base con seeders:
+
+```bash
+curl -i -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"demo_libre1","password":"123456"}'
+```
+
+Copiar el valor de `token` de la respuesta y usarlo en las peticiones protegidas:
+
+```bash
+TOKEN='<token_devuelto_por_el_login>'
+
+curl -i http://localhost:3000/games \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Los controles de acceso responden:
+
+| Situación | Respuesta |
+|---|---|
+| Token ausente, inválido, vencido o usuario inexistente | 401 `TOKEN_INVALIDO` |
+| Rol insuficiente | 403 `ROL_NO_AUTORIZADO` |
+| Consultar o editar otro usuario sin ser administrador | 403 `USUARIO_NO_AUTORIZADO` |
+| Un jugador envía un cambio de rol | 403 `CAMBIO_ROL_NO_AUTORIZADO` |
+
+### Rutas administrativas
+
+| Método | Ruta | Función | Acceso |
+|---|---|---|---|
+| GET | /admin/usuarios | Listar usuarios sin contraseñas ni hashes | Administrador autenticado |
+| GET | /admin/partidas | Listar partidas | Administrador autenticado |
+
+Estas rutas utilizan `autenticar` y `exigirRol('Administrador')`.
 
 ## Partidas y lobby — Entrega 3
 
-Modelos `Partida` y `JugadorPartida` (relación muchos a muchos entre `Usuario` y `Partida`, con rol `DUENO`/`INVITADO`, `numeroJugador` y recursos iniciales). El jugador 1 es el dueño, o el primero en la cola de matchmaking, y despliega en las filas 1 a 4; el 2 en las filas 7 a 10. Todos los endpoints requieren el header `X-Usuario-Id`.
+Modelos `Partida` y `JugadorPartida` (relación muchos a muchos entre `Usuario` y `Partida`, con rol `DUENO`/`INVITADO`, `numeroJugador` y recursos iniciales). El jugador 1 es el dueño, o el primero en la cola de matchmaking, y despliega en las filas 1 a 4; el 2 en las filas 7 a 10. Todos los endpoints requieren `Authorization: Bearer <token>`.
 
 | Método | Ruta | Función | Éxito |
 |---|---|---|---|
@@ -298,17 +391,20 @@ Si se ejecutaron los seeders, también se puede probar el login con
 
 ### Manejo de sesión
 
-El frontend guarda los datos públicos del usuario en `sessionStorage`,
-sin incluir su contraseña. La sesión se mantiene al recargar la misma
-pestaña y se elimina al cerrar sesión o cerrar la pestaña.
+El frontend guarda los datos públicos del usuario y el token JWT en
+`sessionStorage`, sin incluir su contraseña. La sesión se mantiene al
+recargar la misma pestaña y se elimina al cerrar sesión o cerrar la pestaña.
 
-Las rutas `/menu`, `/preparacion` y `/tablero` requieren que exista
-una sesión en el frontend. Esta comprobación controla la navegación;
-la autenticación del servidor mediante JWT queda para la Entrega 4.
+Las rutas `/menu`, `/preparacion` y `/tablero` requieren una sesión en el
+frontend. Al recuperar la sesión se comprueba que existan usuario y token.
+El servidor valida el JWT en cada petición protegida.
+
+`pedirApi` lee el token de `sessionStorage` y agrega el header
+`Authorization: Bearer <token>`. Preparación también utiliza este servicio.
+Si una petición realizada con `pedirApi` recibe `401`, se eliminan usuario y
+token y se redirige a `/login`.
 
 Las cuentas permanecen guardadas en PostgreSQL aunque se cierre sesión.
-Para identificar al usuario en las peticiones a `/games`, se utiliza
-el header `X-Usuario-Id` explicado anteriormente.
 
 ## Turnos, abandono y eventos de partida
 
@@ -332,7 +428,96 @@ el header `X-Usuario-Id` explicado anteriormente.
 
 **Flujo de prueba:** `demo_karla` (turno suyo, ronda 4) → `POST /games/3/terminar-turno` → `demo_diego` → `POST /games/3/terminar-turno` → empieza la ronda 5 con una carta nueva (`GET /games/3/eventos`).
 
+## Pruebas automatizadas con Jest — Entrega 4
+
+### Herramientas y ejecución
+
+Se utilizan Jest y Supertest, con las versiones registradas en
+`package.json` y `package-lock.json`.
+
+Para instalar las dependencias:
+
+```bash
+npm install
+```
+
+Para ejecutar las pruebas:
+
+```bash
+npm test
+```
+
+PostgreSQL debe estar funcionando. Supertest prueba la aplicación exportada
+por `src/app.js`; no hace falta levantar por separado el backend ni el
+frontend.
+
+El comando utiliza `jest --runInBand`, por lo que los archivos de pruebas
+se ejecutan uno después del otro.
+
+### Infraestructura compartida
+
+| Archivo | Función |
+|---|---|
+| `jest.config.js` | Configura Jest y busca los archivos `tests/**/*.test.js` |
+| `tests/setup.js` | Selecciona el entorno de pruebas, comprueba la base y configura las variables de ese entorno |
+| `tests/globalSetup.js` | Prepara la base mediante las migraciones y seeders existentes antes de ejecutar las pruebas |
+| `tests/helpers/tokenDe.js` | Genera tokens para los usuarios utilizados en las pruebas |
+| `tests/auth.test.js` | Contiene las pruebas de autenticación y permisos y sirve como referencia |
+
+Las nuevas pruebas deben utilizar esta configuración común y las
+dependencias existentes.
+
+### Base de datos de pruebas
+
+Se utiliza la configuración `test` de `src/config/database.js`.
+El nombre de la base es `${DB_NAME}_test`; con la configuración local
+del proyecto corresponde a `guerra_pacifico_dev_test`.
+
+Antes de cada ejecución, `tests/globalSetup.js` elimina y vuelve a crear
+esa base, ejecuta las migraciones y carga los seeders.
+
+**Los datos de la base de pruebas se borran al comenzar cada ejecución.**
+La base de desarrollo se conserva.
+
+El usuario de PostgreSQL configurado en `.env` debe tener permisos para
+crear y eliminar la base de pruebas.
+
+La preparación de la base ya está centralizada en `tests/globalSetup.js`;
+los archivos de pruebas reutilizan esa preparación.
+
+### Agregar pruebas de cada integrante
+
+Cada integrante agrega pruebas de las funcionalidades que implementa,
+incluyendo casos de éxito y de error.
+
+- Crear archivos terminados en `.test.js` dentro de `tests`.
+- Utilizar Jest y Supertest con la configuración existente.
+- Importar la aplicación desde `src/app.js` y utilizar `app.callback()` con Supertest.
+- Tomar `tests/auth.test.js` como referencia para preparar usuarios propios y cerrar la conexión con Sequelize al terminar el archivo.
+- Obtener los IDs de los registros creados en la base de pruebas, en lugar de utilizar IDs de la base de desarrollo.
+- Generar los tokens mediante `tests/helpers/tokenDe.js`.
+
+Ejemplo del ayudante desde un archivo ubicado directamente en `tests`:
+
+```javascript
+const tokenDe = require('./helpers/tokenDe');
+
+const token = tokenDe(usuario);
+```
+
+El ayudante recibe un usuario con sus campos `id` y `role` y devuelve
+el token que se envía mediante `Authorization: Bearer <token>`.
+
+Actualmente, `tests/auth.test.js` contiene ocho pruebas de registro,
+contraseñas, login, autenticación y permisos, ejecutadas correctamente
+con `npm test`.
+
+Las pruebas nuevas se ejecutan con el mismo comando.
+
 ## Colecciones de Postman y bitácora de jugadas
+
+Las colecciones corresponden a E3 y están pendientes de adaptación a JWT.
+Son independientes de las pruebas de Jest ejecutadas mediante `npm test`.
 
 | Colección | Qué prueba | Peticiones |
 |---|---|---|

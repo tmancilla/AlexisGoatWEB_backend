@@ -239,6 +239,7 @@ async function armarResultado(partida) {
 
 module.exports = {
   revelarEvento,
+  finalizarPartida,
   terminarTurno,
   resolverTurnoVencido,
   abandonar,

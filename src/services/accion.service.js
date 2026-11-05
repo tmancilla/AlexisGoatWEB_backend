@@ -1,6 +1,7 @@
 const { sequelize, Partida, JugadorPartida, Barco, Casilla, CasillaRevelada, Accion, Combate } = require('../models');
 const HttpError = require('../utils/HttpError');
 const partidaService = require('./partida.service');
+const { validarMejora, mejorar } = require('./mejora.service');
 const { validarId } = require('../utils/validaciones');
 const { clave, dentroDelTablero, distancia, casillasVistas, buscarRuta } = require('../utils/tablero');
 const {
@@ -218,7 +219,8 @@ async function disparar(partida, jugador, barco, datos, transaction) {
 
 const ACCIONES = {
   MOVER: { validar: validarMover, ejecutar: mover },
-  DISPARAR: { validar: validarDisparo, ejecutar: disparar }};
+  DISPARAR: { validar: validarDisparo, ejecutar: disparar },
+  MEJORAR: { validar: validarMejora, ejecutar: mejorar }};
 
 async function realizarAccion(id, usuario, datos) {
   const partidaId = validarId(id);

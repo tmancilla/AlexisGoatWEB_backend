@@ -5,7 +5,12 @@ const accionController = require('../controllers/accion.controller');
 const turnoController = require('../controllers/turno.controller');
 const eventoController = require('../controllers/evento.controller');
 const combateController = require('../controllers/combate.controller');
+const barcoController = require('../controllers/barco.controller');
+const casillaController = require('../controllers/casilla.controller');
 const autenticar = require('../middlewares/autenticar');
+const exigirRol = require('../middlewares/exigirRol');
+
+const soloAdministrador = exigirRol('Administrador');
 
 const router = new Router({
   prefix: '/games',
@@ -35,6 +40,16 @@ router.get('/:id/combates/:combateId', combateController.obtenerCombate);
 router.post('/:id/combates', combateController.crearCombate);
 router.patch('/:id/combates/:combateId', combateController.actualizarCombate);
 router.delete('/:id/combates/:combateId', combateController.eliminarCombate);
+router.get('/:id/barcos', soloAdministrador, barcoController.listarBarcos);
+router.get('/:id/barcos/:barcoId', soloAdministrador, barcoController.obtenerBarco);
+router.post('/:id/barcos', soloAdministrador, barcoController.crearBarco);
+router.patch('/:id/barcos/:barcoId', soloAdministrador, barcoController.actualizarBarco);
+router.delete('/:id/barcos/:barcoId', soloAdministrador, barcoController.eliminarBarco);
+router.get('/:id/casillas', soloAdministrador, casillaController.listarCasillas);
+router.get('/:id/casillas/:casillaId', soloAdministrador, casillaController.obtenerCasilla);
+router.post('/:id/casillas', soloAdministrador, casillaController.crearCasilla);
+router.patch('/:id/casillas/:casillaId', soloAdministrador, casillaController.actualizarCasilla);
+router.delete('/:id/casillas/:casillaId', soloAdministrador, casillaController.eliminarCasilla);
 router.get('/:id', partidaController.obtenerPartida);
 router.patch('/:id', partidaController.actualizarPartida);
 router.delete('/:id', partidaController.cancelarPartida);

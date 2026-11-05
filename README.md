@@ -269,6 +269,16 @@ Las reglas fijas del juego (stats de los barcos, zonas de despliegue, casillas e
 | POST | /games/:id/combates | Crear un combate (solo administrador) | 201 |
 | PATCH | /games/:id/combates/:combateId | Modificar un combate (solo administrador) | 200 |
 | DELETE | /games/:id/combates/:combateId | Eliminar un combate (solo administrador) | 204 |
+| GET | /games/:id/barcos | Listar los barcos de la partida (solo administrador) | 200 |
+| GET | /games/:id/barcos/:barcoId | Consultar un barco (solo administrador) | 200 |
+| POST | /games/:id/barcos | Crear un barco con las stats de su tipo (solo administrador, durante el despliegue) | 201 |
+| PATCH | /games/:id/barcos/:barcoId | Corregir la casilla, el casco o las stats de un barco (solo administrador, en despliegue o en curso) | 200 |
+| DELETE | /games/:id/barcos/:barcoId | Eliminar un barco (solo administrador, durante el despliegue) | 204 |
+| GET | /games/:id/casillas | Listar las 100 casillas del tablero (solo administrador) | 200 |
+| GET | /games/:id/casillas/:casillaId | Consultar una casilla (solo administrador) | 200 |
+| POST | /games/:id/casillas | Crear una casilla en una coordenada libre (solo administrador, durante el despliegue) | 201 |
+| PATCH | /games/:id/casillas/:casillaId | Cambiar el tipo de una casilla o si está agotada (solo administrador, en despliegue o en curso) | 200 |
+| DELETE | /games/:id/casillas/:casillaId | Eliminar una casilla (solo administrador, durante el despliegue) | 204 |
 
 **Lo que hace el servidor:**
 
@@ -280,6 +290,7 @@ Las reglas fijas del juego (stats de los barcos, zonas de despliegue, casillas e
 - Cuando un barco se hunde, por un disparo o por una corriente, deja 2 de chatarra en su casilla para el primer barco que pase por ahí (reglas 28 y 41). La chatarra se guarda en la casilla, por lo que una corriente o un pozo no pierden su efecto, y en el estado aparece como `chatarra` en las casillas visibles.
 - Las acciones de una misma partida se procesan de a una (bloqueo de la fila de la partida), así dos peticiones simultáneas no se pisan.
 - Un combate valida que el atacante y el defensor sean barcos de la partida y de jugadores distintos. En uno a distancia no se guardan dados, y en uno cuerpo a cuerpo van los dos dados, sin empate (se vuelve a lanzar, regla 26), y hay impacto solo si el atacante saca el más alto.
+- El CRUD de barcos y casillas es solo para administradores, ya que si un jugador pudiera leerlos directamente se saltaría la niebla de guerra (regla 22); los jugadores siguen viendo su versión filtrada con `GET /games/:id`. Para no romper una partida en juego, los barcos y las casillas solo se crean o eliminan durante el despliegue, se pueden corregir durante el despliegue o en curso, y una partida terminada no se modifica para que su historial quede intacto. Al crear un barco se revisa que el jugador sea de la partida, que no tenga ya un barco de ese tipo, que la casilla esté en su zona y que no haya otro barco en ella.
 
 **Ajustes al protocolo de E2:**
 

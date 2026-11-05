@@ -1,4 +1,4 @@
-const { sequelize, Partida, JugadorPartida, Barco, Casilla, CasillaRevelada, Accion } = require('../models');
+const { sequelize, Partida, JugadorPartida, Barco, Casilla, CasillaRevelada, Accion, Combate } = require('../models');
 const HttpError = require('../utils/HttpError');
 const partidaService = require('./partida.service');
 const { validarId } = require('../utils/validaciones');
@@ -7,6 +7,7 @@ const {
   BARCOS,
   TIPOS_ACCION,
   MAX_ACCIONES_POR_BARCO,
+  CHATARRA_HUNDIMIENTO,
   RECOGIBLES} = require('../config/reglas');
 
 function jugadaInvalida(codigo, mensaje) {
@@ -36,11 +37,27 @@ function validarMover(datos) {
   }
 }
 
+function validarDisparo(datos) {
+  if (!datos.casillaObjetivo) {
+    throw new HttpError(400, 'CAMPOS_FALTANTES', 'Para disparar debes enviar casillaObjetivo.');
+  }
+  if (!dentroDelTablero(datos.casillaObjetivo)) {
+    throw new HttpError(400, 'FUERA_DEL_TABLERO', 'La casilla objetivo debe tener x e y enteros entre 1 y 10.');
+  }
+}
+
 async function barcosAFlote(partidaId, transaction) {
   return Barco.findAll({
     where: { aFlote: true },
     include: [{ association: 'jugadorPartida', where: { partidaId }, attributes: [] }],
     transaction});
+}
+
+async function dejarChatarra(partidaId, posicion, transaction) {
+  const casilla = await Casilla.findOne({ where: { partidaId, x: posicion.x, y: posicion.y }, transaction });
+  if (casilla) {
+    await casilla.update({ chatarra: casilla.chatarra + CHATARRA_HUNDIMIENTO }, { transaction });
+  }
 }
 
 async function mover(partida, jugador, barco, datos, transaction) {
@@ -97,10 +114,15 @@ async function mover(partida, jugador, barco, datos, transaction) {
     recorridas += 1;
 
     const casilla = casillas.get(clave(paso));
+    if (!casilla) continue;
     const recogible = RECOGIBLES[casilla.tipo];
     if (recogible && !casilla.agotada) {
       recogidos[recogible.recurso] += recogible.cantidad;
       await casilla.update({ agotada: true }, { transaction });
+    }
+    if (casilla.chatarra > 0) {
+      recogidos.chatarra += casilla.chatarra;
+      await casilla.update({ chatarra: 0 }, { transaction });
     }
     if (casilla.tipo === 'CORRIENTE_PELIGROSA') {
       dano = 1;
@@ -117,6 +139,7 @@ async function mover(partida, jugador, barco, datos, transaction) {
   const hundido = cascoActual === 0;
   const combustible = recorridas * costoPorCasilla;
   await barco.update({ x: posicion.x, y: posicion.y, cascoActual, aFlote: !hundido }, { transaction });
+  if (hundido) await dejarChatarra(partida.id, posicion, transaction);
   await jugador.update({
     combustible: jugador.combustible - combustible + recogidos.combustible,
     municion: jugador.municion + recogidos.municion,
@@ -141,8 +164,61 @@ async function mover(partida, jugador, barco, datos, transaction) {
   return { tipoAccion: 'MOVER', barcoId: barco.id, resultado, costos, accionesRestantes: jugador.accionesRestantes };
 }
 
+async function disparar(partida, jugador, barco, datos, transaction) {
+  const objetivo = datos.casillaObjetivo;
+  const { municionPorDisparo, danoDisparo } = BARCOS[barco.tipo];
+  if (jugador.municion < municionPorDisparo) {
+    throw jugadaInvalida('MUNICION_INSUFICIENTE', `Necesitas ${municionPorDisparo} de municion para disparar con este barco y tienes ${jugador.municion}.`);
+  }
+
+  const lejania = distancia(barco, objetivo);
+  if (lejania > barco.alcance) {
+    throw jugadaInvalida('FUERA_DE_ALCANCE', `El objetivo esta a ${lejania} casillas y este barco alcanza ${barco.alcance}.`);
+  }
+
+  const barcos = await barcosAFlote(partida.id, transaction);
+  const blanco = barcos.find((otro) => otro.x === objetivo.x && otro.y === objetivo.y);
+  if (blanco && blanco.jugadorPartidaId === jugador.id) {
+    throw jugadaInvalida('OBJETIVO_PROPIO', 'No puedes disparar a una casilla donde hay un barco tuyo.');
+  }
+
+  await jugador.update({
+    municion: jugador.municion - municionPorDisparo,
+    accionesRestantes: jugador.accionesRestantes - 1}, { transaction });
+
+  let resultado = { impacto: false };
+  if (blanco) {
+    const cascoActual = Math.max(0, blanco.cascoActual - danoDisparo);
+    const hundido = cascoActual === 0;
+    await blanco.update({ cascoActual, aFlote: !hundido }, { transaction });
+    if (hundido) await dejarChatarra(partida.id, blanco, transaction);
+
+    await Combate.create({
+      atacanteId: barco.id,
+      defensorId: blanco.id,
+      tipo: 'DISTANCIA',
+      impacto: true,
+      ronda: partida.rondaActual}, { transaction });
+
+    const propios = barcos.filter((otro) => otro.jugadorPartidaId === jugador.id);
+    const loVe = casillasVistas(propios).has(clave(blanco));
+    resultado = { impacto: true, hundido, cascoRestante: hundido || loVe ? cascoActual : null };
+  }
+  const costos = { municion: municionPorDisparo, acciones: 1 };
+
+  await Accion.create({
+    jugadorPartidaId: jugador.id,
+    barcoId: barco.id,
+    tipo: 'DISPARAR',
+    ronda: partida.rondaActual,
+    resultado: { casillaObjetivo: { x: objetivo.x, y: objetivo.y }, ...resultado, costos }}, { transaction });
+
+  return { tipoAccion: 'DISPARAR', barcoId: barco.id, resultado, costos, accionesRestantes: jugador.accionesRestantes };
+}
+
 const ACCIONES = {
-  MOVER: { validar: validarMover, ejecutar: mover }};
+  MOVER: { validar: validarMover, ejecutar: mover },
+  DISPARAR: { validar: validarDisparo, ejecutar: disparar }};
 
 async function realizarAccion(id, usuario, datos) {
   const partidaId = validarId(id);

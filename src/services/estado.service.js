@@ -37,9 +37,9 @@ function ordenarPorTipo(barcos) {
 }
 
 function tipoVisible(casilla, revelada) {
-  if (casilla.agotada) return 'AGUA_ABIERTA';
-  if (casilla.tipo === 'CORRIENTE_PELIGROSA' && !revelada) return 'AGUA_ABIERTA';
-  return casilla.tipo;
+  let tipo = casilla.tipo;
+  if (casilla.agotada || (tipo === 'CORRIENTE_PELIGROSA' && !revelada)) tipo = 'AGUA_ABIERTA';
+  return tipo === 'AGUA_ABIERTA' && casilla.chatarra > 0 ? 'CHATARRA' : tipo;
 }
 
 function casillasVisibles(casillas, vistas, reveladas, barcosAFlote) {
@@ -52,6 +52,7 @@ function casillasVisibles(casillas, vistas, reveladas, barcosAFlote) {
       const tipo = tipoVisible(casilla, revelada);
       const visible = { x: casilla.x, y: casilla.y, tipo };
       if (CASILLAS_DE_RECURSO.includes(tipo)) visible.ocupadaPor = ocupantes.get(clave(casilla)) || null;
+      if (casilla.chatarra > 0) visible.chatarra = casilla.chatarra;
       if (revelada) visible.reveladaEnRonda = revelada.rondaDescubierta;
       return visible;});
 }

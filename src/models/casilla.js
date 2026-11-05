@@ -31,7 +31,15 @@ module.exports = (sequelize, DataTypes) => {
       agotada: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
-        defaultValue: false}},
+        defaultValue: false},
+
+      chatarra: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+        validate: {
+          isInt: { msg: 'La chatarra de una casilla debe ser un entero.' },
+          min: { args: [0], msg: 'La chatarra de una casilla no puede ser negativa.' }}}},
     {
       tableName: 'Casillas',
       indexes: [{ unique: true, fields: ['partidaId', 'x', 'y'] }]});

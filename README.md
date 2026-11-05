@@ -243,12 +243,12 @@ esperados.
 
 ## Tablero, despliegue y acciones — Entrega 3
 
-Modelos del tablero y la flota, con sus migraciones (`004` a `009` y `012`), asociaciones y validaciones:
+Modelos del tablero y la flota, con sus migraciones (`004` a `009`, `012` y `013`), asociaciones y validaciones:
 
 | Tabla | Para qué |
 |---|---|
 | `CatalogoMejoras` | Las 4 mejoras de la regla 30 (se cargan con el seeder `004`) |
-| `Casillas` | Las 100 casillas de cada partida, una por coordenada |
+| `Casillas` | Las 100 casillas de cada partida, una por coordenada, con la chatarra que dejan los barcos hundidos |
 | `Barcos` | Los 4 barcos de cada jugador, con sus stats y su posición |
 | `CasillasReveladas` | Lo que cada jugador ya descubrió del mapa (relación "descubre" del ER) |
 | `MejorasBarco` | Las mejoras que compró cada barco (relación "adquiere" del ER) |
@@ -261,7 +261,7 @@ Las reglas fijas del juego (stats de los barcos, zonas de despliegue, casillas e
 |---|---|---|---|
 | POST | /games/:id/desplegar | Desplegar la flota | 200 |
 | GET | /games/:id | Estado de la partida filtrado por jugador (en despliegue, en curso o terminada) | 200 |
-| POST | /games/:id/acciones | Realizar una acción (por ahora `MOVER`) | 200 |
+| POST | /games/:id/acciones | Realizar una acción (`MOVER` o `DISPARAR`) | 200 |
 | GET | /games/:id/acciones | Listar mis acciones en la partida | 200 |
 | GET / PATCH / DELETE | /games/:id/acciones/:accionId | Consultar, corregir o borrar una acción (corregir y borrar solo en partidas terminadas) | 200 / 204 |
 | GET | /games/:id/combates | Listar los combates de la partida | 200 |
@@ -275,7 +275,9 @@ Las reglas fijas del juego (stats de los barcos, zonas de despliegue, casillas e
 - Cuando la partida pasa a `DESPLIEGUE`, genera su tablero (las 12 casillas especiales de la regla 7, sorteadas con `crypto`) y guarda en `expiraEn` el plazo de 2 minutos para desplegar.
 - `desplegar` exige 4 barcos, uno de cada tipo, en casillas distintas y dentro de la zona del `numeroJugador` (filas 1 a 4 o 7 a 10). Cuando los dos están listos, la partida pasa a `EN_CURSO`, se sortea quién parte y el otro recibe 2 de combustible extra. Si se vence el plazo, la siguiente consulta a la partida despliega al azar al que faltaba.
 - El estado solo incluye lo que ve cada jugador: las casillas dentro del radio de detección de sus barcos a flote (distancia Manhattan) y las que ya reveló. Las corrientes que no ha descubierto se ven como agua y, del rival, solo se mandan los barcos dentro de su radio y cuántos le quedan a flote.
-- `MOVER` valida en el orden del protocolo, busca el camino más corto que esquive los barcos visibles y cobra el combustible de las casillas recorridas. En el camino recoge la chatarra de los naufragios, se frena en las corrientes (−1 de casco) o junto a un enemigo que no se veía, y controla el máximo de 2 acciones por barco.
+- `MOVER` valida en el orden del protocolo, busca el camino más corto que esquive los barcos visibles y cobra el combustible de las casillas recorridas. En el camino recoge la chatarra de los naufragios y de los barcos hundidos y los botines flotantes, se frena en las corrientes (−1 de casco) o junto a un enemigo que no se veía, y controla el máximo de 2 acciones por barco.
+- `DISPARAR` cuesta 1 acción más la munición del barco y apunta a cualquier casilla dentro de su alcance, visible o en la niebla (reglas 23 a 25). Si hay un enemigo le quita 1 de casco, o 2 si dispara el Acorazado, y se guarda el combate a distancia. Al atacante solo se le informa si hubo impacto y si lo hundió, y el casco restante solo cuando el enemigo está dentro de su radio de detección; si el disparo cae al agua, la respuesta es `{ "impacto": false }` y nada más.
+- Cuando un barco se hunde, por un disparo o por una corriente, deja 2 de chatarra en su casilla para el primer barco que pase por ahí (reglas 28 y 41). La chatarra se guarda en la casilla, por lo que una corriente o un pozo no pierden su efecto, y en el estado aparece como `chatarra` en las casillas visibles.
 - Las acciones de una misma partida se procesan de a una (bloqueo de la fila de la partida), así dos peticiones simultáneas no se pisan.
 - Un combate valida que el atacante y el defensor sean barcos de la partida y de jugadores distintos. En uno a distancia no se guardan dados, y en uno cuerpo a cuerpo van los dos dados, sin empate (se vuelve a lanzar, regla 26), y hay impacto solo si el atacante saca el más alto.
 
@@ -285,9 +287,12 @@ Las reglas fijas del juego (stats de los barcos, zonas de despliegue, casillas e
 - Nuevo error `409 YA_DESPLEGASTE`, cuando un jugador intenta desplegar dos veces.
 - El estado agrega `yo.numeroJugador`, `yo.listo`, `rival.numeroJugador`, `rival.listo` y `despliegueExpiraEn`. `jugadorActivo` y `jugadorId` son ids de usuario, los `barcoId` son números y `accionesPorBarco` usa el id del barco como clave.
 - Las jugadas que violan las reglas (fuera de turno, sin recursos, fuera de alcance, etc.) responden `422`, como pide la Entrega 4. Los datos mal formados responden `400`, lo que no es tuyo `403` y lo que no existe `404`. Códigos nuevos: `DESTINO_INVALIDO`, `ACCION_NO_DISPONIBLE` y `TIPO_ACCION_INVALIDO`.
-- El resultado de `MOVER` puede incluir `chatarraRecogida` y `hundido`.
+- El resultado de `MOVER` puede incluir `chatarraRecogida`, `combustibleRecogido`, `municionRecogida` y `hundido`.
+- `MUNICION_INSUFICIENTE` y `FUERA_DE_ALCANCE` responden `422` como el resto de las jugadas inválidas (el protocolo de E2 tenía 409 y 400), y hay un código nuevo, `OBJETIVO_PROPIO`, para cuando se apunta a una casilla con un barco propio.
+- Los errores de formato del cuerpo de una acción (campos que faltan o casillas fuera del tablero) responden `400` antes de revisar el turno o los recursos.
+- Las casillas visibles pueden traer `chatarra` con la cantidad que quedó ahí; si la casilla es de agua, su `tipo` se muestra como `CHATARRA`.
 
-**Pendiente:** las acciones `DISPARAR`, `VIGIA` y `MEJORAR`, la resolución automática de los combates dentro del juego (la tabla y su CRUD ya existen), la chatarra al hundirse y el "contacto perdido". El cambio de turno, el abandono, las cartas de evento (`eventoRonda`) y el resultado final (`resultadoFinal`) están en la sección "Turnos, abandono y eventos de partida".
+**Pendiente:** las acciones `VIGIA` y `MEJORAR`, el combate cuerpo a cuerpo automático, el fin de la partida por flota destruida y el "contacto perdido". El cambio de turno, el abandono, las cartas de evento (`eventoRonda`) y el resultado final (`resultadoFinal`) están en la sección "Turnos, abandono y eventos de partida".
 
 **Datos de prueba:** el seeder `005-demo-tablero` carga el tablero y los barcos de la partida en curso de `demo_karla` contra `demo_diego` (partida 3, ronda 4, turno de Karla), junto con una mejora, una corriente revelada y algunas acciones de historial. El seeder `006-demo-historial` agrega los combates y las acciones de la partida terminada de `demo_elena` contra `demo_fede` (partida 4), que explican cómo se hundió la flota de Fede, y un disparo de Karla en la partida en curso. Las cartas de evento vienen del seeder `002`.
 

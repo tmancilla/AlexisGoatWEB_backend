@@ -9,6 +9,7 @@ const barcoController = require('../controllers/barco.controller');
 const casillaController = require('../controllers/casilla.controller');
 const autenticar = require('../middlewares/autenticar');
 const exigirRol = require('../middlewares/exigirRol');
+const avisarPartida = require('../middlewares/avisarPartida');
 
 const soloAdministrador = exigirRol('Administrador');
 
@@ -20,16 +21,16 @@ router.use(autenticar);
 
 router.get('/', partidaController.listarPartidas);
 router.post('/', partidaController.crearPartida);
-router.post('/matchmaking', partidaController.buscarRival);
-router.post('/:codigo/join', partidaController.unirsePorCodigo);
-router.post('/:id/desplegar', despliegueController.desplegar);
-router.post('/:id/acciones', accionController.realizarAccion);
+router.post('/matchmaking', avisarPartida('RIVAL_ENCONTRADO', { lobby: true }), partidaController.buscarRival);
+router.post('/:codigo/join', avisarPartida('JUGADOR_UNIDO', { lobby: true }), partidaController.unirsePorCodigo);
+router.post('/:id/desplegar', avisarPartida('DESPLIEGUE'), despliegueController.desplegar);
+router.post('/:id/acciones', avisarPartida('ACCION'), accionController.realizarAccion);
 router.get('/:id/acciones', accionController.listarAcciones);
 router.get('/:id/acciones/:accionId', accionController.obtenerAccion);
 router.patch('/:id/acciones/:accionId', accionController.actualizarAccion);
 router.delete('/:id/acciones/:accionId', accionController.eliminarAccion);
-router.post('/:id/terminar-turno', turnoController.terminarTurno);
-router.post('/:id/abandonar', turnoController.abandonar);
+router.post('/:id/terminar-turno', avisarPartida('TURNO_TERMINADO'), turnoController.terminarTurno);
+router.post('/:id/abandonar', avisarPartida('ABANDONO'), turnoController.abandonar);
 router.get('/:id/eventos', eventoController.listarEventos);
 router.get('/:id/eventos/:eventoId', eventoController.obtenerEvento);
 router.post('/:id/eventos', eventoController.crearEvento);
@@ -51,7 +52,7 @@ router.post('/:id/casillas', soloAdministrador, casillaController.crearCasilla);
 router.patch('/:id/casillas/:casillaId', soloAdministrador, casillaController.actualizarCasilla);
 router.delete('/:id/casillas/:casillaId', soloAdministrador, casillaController.eliminarCasilla);
 router.get('/:id', partidaController.obtenerPartida);
-router.patch('/:id', partidaController.actualizarPartida);
-router.delete('/:id', partidaController.cancelarPartida);
+router.patch('/:id', avisarPartida('PARTIDA_INICIADA', { lobby: true }), partidaController.actualizarPartida);
+router.delete('/:id', avisarPartida('PARTIDA_CANCELADA', { lobby: true }), partidaController.cancelarPartida);
 
 module.exports = router;

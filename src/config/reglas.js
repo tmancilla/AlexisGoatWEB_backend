@@ -65,6 +65,10 @@ const CARTAS_EVENTO = {
   SABOTAJE: 'Un jugador elegido al azar pierde 1 de munición.',
   MAREA_ALTA: 'Las corrientes peligrosas no hacen daño esta ronda.'};
 
+// regla 33
+
+const MUNICION_SABOTAJE = 1;
+
 // regla 36
 const PUNTOS = {
   BARCO_A_FLOTE: 5,
@@ -98,6 +102,7 @@ module.exports = {
   RECOLECCION,
   COMBUSTIBLE_RESERVA,
   CARTAS_EVENTO,
+  MUNICION_SABOTAJE,
   PUNTOS,
   MOTIVOS_FIN,
 };

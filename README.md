@@ -442,6 +442,8 @@ Las cuentas permanecen guardadas en PostgreSQL aunque se cierre sesión.
 
 **Ajustes al protocolo de E2:** `terminar-turno` y `abandonar` responden con un resumen JSON en vez de cuerpo vacío, porque aún no hay WebSocket. Los errores de juego usan `422`, igual que las acciones. Las cartas se revelan y se muestran, pero sus efectos todavía no se aplican.
 
+**Cartas de evento:** al revelarse, **Sabotaje** le quita 1 de munición a un jugador elegido al azar (sin bajar de 0) y **Botín flotante** convierte una casilla de agua vacía (sin barcos ni chatarra) en `BOTIN_COMBUSTIBLE` o `BOTIN_MUNICION`, que entrega 2 del recurso al primer barco que pasa por ella. El detalle (a quién le tocó o dónde apareció el botín) queda en la `descripcion` de la carta y se ve en `eventoRonda.efecto`. **Tormenta** y **Marea alta** se aplican durante la ronda en las acciones y el estado.
+
 **Flujo de prueba:** `demo_karla` (turno suyo, ronda 4) → `POST /games/3/terminar-turno` → `demo_diego` → `POST /games/3/terminar-turno` → empieza la ronda 5 con una carta nueva (`GET /games/3/eventos`).
 
 ## Pruebas automatizadas con Jest — Entrega 4

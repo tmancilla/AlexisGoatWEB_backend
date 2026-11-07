@@ -2,15 +2,19 @@ const { Op } = require('sequelize');
 const { sequelize, Partida, JugadorPartida, Barco, Casilla, EventoPartida } = require('../models');
 const HttpError = require('../utils/HttpError');
 const { validarId } = require('../utils/validaciones');
-const { mezclar } = require('../utils/tablero');
+const { clave, mezclar } = require('../utils/tablero');
 const {
   ACCIONES_POR_TURNO,
+  CANTIDAD_BOTIN,
   CARTAS_EVENTO,
   CASILLAS_DE_RECURSO,
   COMBUSTIBLE_RESERVA,
+  MUNICION_SABOTAJE,
   PUNTOS,
+  RECOGIBLES,
   RECOLECCION,
-  SEGUNDOS_TURNO} = require('../config/reglas');
+  SEGUNDOS_TURNO,
+  TIPOS_BOTIN} = require('../config/reglas');
 
 const ESTADOS_ABANDONABLES = ['DESPLIEGUE', 'EN_CURSO'];
 
@@ -32,17 +36,58 @@ async function buscarPartidaYJugador(partidaId, usuario, transaction) {
   return { partida, jugador };
 }
 
-// la carta se revela al inicio de cada ronda
-async function revelarEvento(partida, ronda, transaction) {
-  const [tipoCarta] = mezclar(Object.keys(CARTAS_EVENTO));
-  return EventoPartida.create(
-    { partidaId: partida.id, ronda, tipoCarta, descripcion: CARTAS_EVENTO[tipoCarta] },
-    { transaction });
+// regla 33 sabotaje
+async function aplicarSabotaje(partida, transaction) {
+  const jugadores = await JugadorPartida.findAll({
+    where: { partidaId: partida.id },
+    include: [{ association: 'usuario', attributes: ['username'] }],
+    transaction});
+  const [afectado] = mezclar(jugadores);
+  const perdida = Math.min(MUNICION_SABOTAJE, afectado.municion);
+
+  if (perdida > 0) {
+    await afectado.decrement('municion', { by: perdida, transaction });
+  }
+
+  return `Le tocó a ${afectado.usuario.username}, que perdió ${perdida} de munición.`;
 }
 
-// al empezar su turno el jugador recolecta, recupera sus 3 acciones
-// y, si quedó sin combustible ni casillas de recurso, recibe 1 de reserva
+// regla 33 botin flotante
+async function aparecerBotin(partida, transaction) {
+  const jugadores = await JugadorPartida.findAll({ where: { partidaId: partida.id }, attributes: ['id'], transaction });
+  const barcos = await Barco.findAll({
+    where: { jugadorPartidaId: jugadores.map((jugador) => jugador.id), aFlote: true },
+    attributes: ['x', 'y'],
+    transaction});
+  const ocupadas = new Set(barcos.map(clave));
+  const agua = await Casilla.findAll({ where: { partidaId: partida.id, tipo: 'AGUA_ABIERTA', chatarra: 0 }, transaction });
+  const [casilla] = mezclar(agua.filter((candidata) => !ocupadas.has(clave(candidata))));
+
+  if (!casilla) {
+    return 'No quedaban casillas vacías, así que no apareció botín.';
+  }
+
+  const [tipo] = mezclar(TIPOS_BOTIN);
+  await casilla.update({ tipo, agotada: false }, { transaction });
+
+  return `Apareció ${CANTIDAD_BOTIN} de ${RECOGIBLES[tipo].recurso} en (${casilla.x}, ${casilla.y}).`;
+}
+
+const EFECTOS_AL_REVELAR = {
+  SABOTAJE: aplicarSabotaje,
+  BOTIN_FLOTANTE: aparecerBotin};
+
+
+async function revelarEvento(partida, ronda, transaction, tipoCarta = mezclar(Object.keys(CARTAS_EVENTO))[0]) {
+  const efecto = EFECTOS_AL_REVELAR[tipoCarta];
+  const detalle = efecto ? await efecto(partida, transaction) : null;
+  const descripcion = detalle ? `${CARTAS_EVENTO[tipoCarta]} ${detalle}` : CARTAS_EVENTO[tipoCarta];
+
+  return EventoPartida.create({ partidaId: partida.id, ronda, tipoCarta, descripcion }, { transaction });
+}
+
 async function iniciarTurno(jugador, transaction) {
+  await jugador.reload({ transaction });
   const barcos = await Barco.findAll({ where: { jugadorPartidaId: jugador.id, aFlote: true }, transaction });
   const casillas = await Casilla.findAll({
     where: { partidaId: jugador.partidaId, tipo: Object.keys(RECOLECCION), agotada: false },

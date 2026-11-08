@@ -17,6 +17,7 @@ async function resolverPartidasVencidas() {
   const vencidas = await Partida.findAll({
     where: { estado: Object.keys(RESOLVER_SEGUN_ESTADO), expiraEn: { [Op.lt]: new Date() } },
     attributes: ['id', 'estado'],
+    logging: false,
   });
 
   for (const partida of vencidas) {
@@ -33,6 +34,7 @@ async function cerrarLobbiesExpirados() {
   const expirados = await Partida.findAll({
     where: { modo: 'PRIVADA', estado: 'ESPERANDO_JUGADOR', expiraEn: { [Op.lt]: new Date() } },
     attributes: ['id'],
+    logging: false,
   });
 
   for (const lobby of expirados) {

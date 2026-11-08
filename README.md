@@ -434,13 +434,13 @@ Las cuentas permanecen guardadas en PostgreSQL aunque se cierre sesión.
 | PATCH | /games/:id/eventos/:eventoId | Modifica una carta (solo administrador) | 200 |
 | DELETE | /games/:id/eventos/:eventoId | Elimina una carta (solo administrador) | 204 |
 
-**Turnos:** al terminar el turno, el rival recolecta los recursos de las casillas que ocupa (regla 8), recupera sus 3 acciones (regla 14) y recibe 1 de combustible de reserva si quedó sin combustible ni casillas de recurso (regla 18). La ronda cambia cuando el turno vuelve al jugador que inició la partida, y en ese momento el servidor revela una carta al azar (regla 33). Si el turno vence (3 minutos), el servidor lo cierra al consultar la partida (regla 15). Al terminar la ronda 20 se calcula el puntaje de la regla 36 con los desempates de la regla 37.
+**Turnos:** al terminar el turno, el rival recolecta los recursos de las casillas que ocupa (regla 8), recupera sus 3 acciones (regla 14) y recibe 1 de combustible de reserva si quedó sin combustible ni casillas de recurso (regla 18). La ronda cambia cuando el turno vuelve al jugador que inició la partida, y en ese momento el servidor revela una carta al azar (regla 33). Si el turno vence (3 minutos), el servidor lo cierra solo: un intervalo revisa cada 5 segundos los turnos y despliegues vencidos y avisa por WebSocket (regla 15). También se resuelve al consultar la partida, como respaldo. Al terminar la ronda 20 se calcula el puntaje de la regla 36 con los desempates de la regla 37.
 
 **Abandono:** termina la partida con victoria del rival (regla 38). En el lobby se sigue usando `DELETE /games/:id`.
 
 **Estado de la partida:** `GET /games/:id` ahora incluye `eventoRonda` (`{ carta, efecto }`) y, cuando la partida termina, `resultadoFinal` con `motivo` (`FLOTA_DESTRUIDA`, `LIMITE_RONDAS`, `ABANDONO` o `EMPATE`), `ganador` y `puntajes` por jugador.
 
-**Ajustes al protocolo de E2:** `terminar-turno` y `abandonar` responden con un resumen JSON en vez de cuerpo vacío, porque aún no hay WebSocket. Los errores de juego usan `422`, igual que las acciones. Las cartas se revelan y se muestran, pero sus efectos todavía no se aplican.
+**Ajustes al protocolo de E2:** `terminar-turno` y `abandonar` responden con un resumen JSON en vez de cuerpo vacío; así quien hizo la jugada tiene el resultado sin esperar el aviso del socket. Los errores de juego usan `422`, igual que las acciones.
 
 **Cartas de evento:** al revelarse, **Sabotaje** le quita 1 de munición a un jugador elegido al azar (sin bajar de 0) y **Botín flotante** convierte una casilla de agua vacía (sin barcos ni chatarra) en `BOTIN_COMBUSTIBLE` o `BOTIN_MUNICION`, que entrega 2 del recurso al primer barco que pasa por ella. El detalle (a quién le tocó o dónde apareció el botín) queda en la `descripcion` de la carta y se ve en `eventoRonda.efecto`. **Tormenta** y **Marea alta** se aplican durante la ronda en las acciones y el estado.
 
@@ -532,6 +532,8 @@ con `npm test`.
 
 Las pruebas nuevas se ejecutan con el mismo comando.
 
+`tests/turnos.test.js` prueba terminar turno (200 y 422 `NO_ES_TU_TURNO`) y abandonar (la partida queda `TERMINADA` con el rival como ganador). `tests/socket.test.js` levanta un servidor real en un puerto libre y conecta clientes con `socket.io-client` para probar la autenticación, las salas y los avisos.
+
 ## Colecciones de Postman y bitácora de jugadas
 
 Las colecciones corresponden a E3 y están pendientes de adaptación a JWT.
@@ -548,3 +550,76 @@ Son independientes de las pruebas de Jest ejecutadas mediante `npm test`.
 Cada colección modifica los datos de prueba (crea partidas, mueve barcos o termina la partida), así que hay que correr `npm run db:reset` antes de ejecutar cada una con el Runner. Las variables traen los ids de una base recién reseteada y el resto de los ids se guardan solos. Todas las peticiones tienen un ejemplo de respuesta y tests que revisan el código HTTP.
 
 La [bitácora de ejecución de jugadas](docs/bitacora-jugadas.md) registra una partida completa jugada contra la API, desde el registro de dos usuarios hasta el resultado final, con cada petición y la respuesta del servidor.
+
+## Tiempo real con WebSockets
+
+El backend usa **socket.io** en el mismo puerto que la API (`src/index.js` crea un servidor http con Koa y le monta el socket). El socket solo avisa que algo cambió. El cliente vuelve a pedir `GET /games/:id`, que filtra la niebla de guerra para cada jugador. Así nunca viaja por el socket información del rival que no debería ver.
+
+| Archivo | Función |
+|---|---|
+| `src/realtime/socket.js` | Autenticación con JWT, salas y envío de avisos |
+| `src/middlewares/avisarPartida.js` | Después de cada POST/PATCH/DELETE exitoso de una partida, avisa a sus jugadores |
+| `src/realtime/vencimientos.js` | Cada 5 s cierra turnos y despliegues vencidos y borra lobbies privados expirados |
+
+### Conexión
+
+```javascript
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:3000', { auth: { token } }); // el mismo JWT del login
+socket.on('connect_error', (error) => console.log(error.message)); // 'TOKEN_INVALIDO'
+```
+
+Sin token, con un token vencido o con un usuario que ya no existe, la conexión se rechaza con `TOKEN_INVALIDO`. Al conectarse, cada usuario entra solo a su sala personal `usuario:{id}`, por donde recibe los avisos del lobby. El origen permitido es `FRONTEND_URL`, igual que en CORS.
+
+### Eventos del cliente al servidor
+
+| Evento | Datos | Respuesta (ack) |
+|---|---|---|
+| `partida:unirse` | `{ partidaId }` | `{ ok: true, partidaId }` o `{ ok: false, codigo, mensaje }` con `ID_INVALIDO`, `PARTIDA_NO_EXISTE` o `NO_PERTENECES_A_LA_PARTIDA` |
+| `partida:salir` | `{ partidaId }` | `{ ok: true }` |
+
+En `partida:terminada`, `motivo` es el `motivoFin` (`FLOTA_DESTRUIDA`, `LIMITE_RONDAS`, `ABANDONO` o `EMPATE`) y `ganador` es el `usuarioId` del ganador (`null` si hay empate).
+Solo entran a la sala `partida:{id}` sus jugadores y el administrador, con la misma regla que `GET /games/:id`.
+
+```javascript
+socket.emit('partida:unirse', { partidaId: 3 }, (respuesta) => console.log(respuesta));
+```
+
+### Eventos del servidor al cliente
+
+| Evento | Quién lo recibe | Datos |
+|---|---|---|
+| `partida:actualizada` | Sala `partida:{id}` | `{ partidaId, motivo }` |
+| `lobby:actualizado` | Sala personal de cada jugador de la partida | `{ partidaId, motivo }` |
+| `partida:terminada` | Sala de la partida y salas personales de sus jugadores | `{ partidaId, motivo, ganador }` |
+
+Valores de `motivo` en `partida:actualizada` y `lobby:actualizado`:
+
+| `motivo` | Cuándo ocurre | Eventos |
+|---|---|---|
+| `RIVAL_ENCONTRADO` | `POST /games/matchmaking` arma una partida | `partida:actualizada`, `lobby:actualizado` |
+| `JUGADOR_UNIDO` | `POST /games/:codigo/join` | `partida:actualizada`, `lobby:actualizado` |
+| `PARTIDA_INICIADA` | `PATCH /games/:id` | `partida:actualizada`, `lobby:actualizado` |
+| `PARTIDA_CANCELADA` | `DELETE /games/:id` | `partida:actualizada`, `lobby:actualizado` |
+| `LOBBY_EXPIRADO` | El intervalo borra un lobby privado expirado | `partida:actualizada`, `lobby:actualizado` |
+| `DESPLIEGUE` | `POST /games/:id/desplegar` | `partida:actualizada` |
+| `ACCION` | `POST /games/:id/acciones` | `partida:actualizada` |
+| `TURNO_TERMINADO` | `POST /games/:id/terminar-turno` | `partida:actualizada` |
+| `ABANDONO` | `POST /games/:id/abandonar` | `partida:actualizada`, `partida:terminada` |
+| `DESPLIEGUE_VENCIDO` | El intervalo cierra un despliegue vencido | `partida:actualizada` |
+| `TURNO_VENCIDO` | El intervalo cierra un turno vencido | `partida:actualizada` |
+
+Cualquier aviso que deje la partida en `TERMINADA` (por ejemplo, una `ACCION` que hunde el último barco o el turno de la ronda 20) también envía `partida:terminada`. Las jugadas rechazadas (4xx) y la respuesta `202` del matchmaking, cuando todavía no hay rival, no envían avisos.
+
+### Cómo probarlo con dos ventanas
+
+1. Levantar backend (`npm run dev`) y frontend (`npm run dev`).
+2. Abrir `http://localhost:5173` en una ventana normal y en una de incógnito.
+3. Iniciar sesión con dos usuarios distintos y probar:
+   - **Lobby por código:** uno crea una partida privada y el otro se une con el código. El primero ve "Partida lista" sin recargar.
+   - **Matchmaking:** ambos buscan rival y los dos pasan a "Partida lista".
+   - **Preparación:** el primero que confirma su despliegue queda esperando. Cuando el rival confirma el suyo, la pantalla del primero pasa sola al tablero sin recargar.
+   - **Abandono:** si uno abandona, el otro ve el aviso al instante.
+
+Las pruebas automáticas están en `tests/socket.test.js`.

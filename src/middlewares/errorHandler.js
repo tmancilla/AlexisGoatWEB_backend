@@ -21,7 +21,7 @@ module.exports = async (ctx, next) => {
       ctx.body = { codigo: 'REFERENCIA_INVALIDA', mensaje: 'Se hace referencia a un registro que no existe.' };
     } else if (err.codigo) {
       ctx.status = err.status;
-      ctx.body = { codigo: err.codigo, mensaje: err.message };
+      ctx.body = { ...err.datos, codigo: err.codigo, mensaje: err.message };
     } else if (err.status === 400) {
       ctx.status = 400;
       ctx.body = { codigo: 'JSON_MALFORMADO', mensaje: 'El cuerpo de la petición no es JSON válido' };

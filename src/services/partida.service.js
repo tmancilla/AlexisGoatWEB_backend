@@ -65,13 +65,18 @@ async function buscarPartidaActiva(usuarioId, transaction) {
   return participacion ? participacion.partida : null;
 }
 
+function errorYaEnPartida(partida, mensaje) {
+  return new HttpError(409, 'YA_ESTAS_EN_PARTIDA', mensaje, {
+    partidaActiva: { partidaId: partida.id, estado: partida.estado, modo: partida.modo },
+  });
+}
+
 async function asegurarSinPartidaActiva(usuarioId, transaction) {
   const activa = await buscarPartidaActiva(usuarioId, transaction);
 
   if (activa) {
-    throw new HttpError(
-      409,
-      'YA_ESTAS_EN_PARTIDA',
+    throw errorYaEnPartida(
+      activa,
       'Ya estás en otra partida activa, tienes un lobby abierto o estás buscando rival.'
     );
   }
@@ -227,11 +232,7 @@ async function buscarRival(usuario) {
         return { encontrado: true, partida: await obtenerConJugadores(actual.id, transaction) };
       }
 
-      throw new HttpError(
-        409,
-        'YA_ESTAS_EN_PARTIDA',
-        'Ya estás en una partida activa o tienes un lobby abierto.'
-      );
+      throw errorYaEnPartida(actual, 'Ya estás en una partida activa o tienes un lobby abierto.');
     }
 
     const condicionRival = { modo: 'MATCHMAKING', estado: 'ESPERANDO_JUGADOR' };

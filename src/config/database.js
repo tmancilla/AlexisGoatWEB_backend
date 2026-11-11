@@ -10,8 +10,18 @@ const base = {
   seederStorage: 'sequelize',
 };
 
+const produccion = process.env.DATABASE_URL
+  ? {
+    use_env_variable: 'DATABASE_URL',
+    dialect: 'postgres',
+    seederStorage: 'sequelize',
+    dialectOptions: process.env.DB_SSL === 'false' ? {} : { ssl: { require: true, rejectUnauthorized: false } },
+    logging: false,
+  }
+  : { ...base, logging: false };
+
 module.exports = {
   development: base,
   test: { ...base, database: `${process.env.DB_NAME}_test` },
-  production: base,
+  production: produccion,
 };
